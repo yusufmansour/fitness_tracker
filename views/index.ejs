@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Activity Tracker</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app">
+  <%- include('partials/header', { activePage:'home', user:user }) %>
+
+  <main class="app-main" style="grid-template-columns:1fr;">
+    <section class="card hero">
+      <h1 class="page-title">Track, Improve, Thrive.</h1>
+      <p class="subtle">Simple, secure tracking for your daily activity metrics.</p>
+      <div class="actions" style="margin-top:.5rem; display:flex; gap:.75rem; flex-wrap:wrap;">
+        <% if (user) { %>
+          <a href="/dashboard" class="btn">Go to My Progress</a>
+        <% } else { %>
+          <a href="/register" class="btn">Get Started</a>
+          <a href="/login" class="btn" style="background:var(--color-text-light);">Login</a>
+        <% } %>
+      </div>
+    </section>
+    <% if (user) { %>
+    <section class="card" id="recentUpdates" style="display:flex; flex-direction:column; gap:.75rem;">
+      <h2 style="margin:0;font-size:1.15rem;">Recent Updates</h2>
+      <p class="subtle" style="margin-top:-.3rem;font-size:.7rem;">Top 3 rank changes and goal milestones.</p>
+      <ul id="updatesList" style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.5rem; min-height:40px;">
+        <li class="subtle" id="updatesLoading">Loading…</li>
+      </ul>
+      <button id="showMoreUpdates" class="btn small" style="align-self:flex-start; display:none;">Show More</button>
+    </section>
+    <% } %>
+    <section class="card" style="display:grid; gap:.75rem;">
+      <h2>Why Use This?</h2>
+      <ul class="feature-list" style="list-style:none; padding:0; margin:0; display:grid; gap:.5rem;">
+        <li class="feature-item">⚡ Fast & lightweight</li>
+        <li class="feature-item">🔐 Private sessions</li>
+        <li class="feature-item">📈 Clear insights</li>
+        <li class="feature-item">🌓 Light / Dark mode</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="app-footer"><small>&copy; <span id="year"></span> Activity Tracker</small></footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const btn = document.getElementById('toggleTheme');
+    const stored = localStorage.getItem('theme'); if(stored){ document.documentElement.dataset.theme = stored; }
+    btn && btn.addEventListener('click', ()=>{ const next=document.documentElement.dataset.theme==='dark'?'light':'dark'; document.documentElement.dataset.theme=next; localStorage.setItem('theme',next); });
+    // Recent updates fetch
+    (function(){
+      const list = document.getElementById('updatesList'); if(!list) return; const loadEl=document.getElementById('updatesLoading'); const moreBtn=document.getElementById('showMoreUpdates'); let offset=0; const page=10; let total=0;
+      function icon(user){ return `<svg width=110 height=40 viewBox='0 0 300 110' preserveAspectRatio='xMidYMid meet' style='display:block;'>`+
+        `<g transform='translate(0,110) scale(0.09,-0.09)' stroke='none'>`+
+        `<path fill='${user.oarColor||'#FF4F4F'}' d='M1161 1018 c7 -13 37 -53 68 -90 31 -37 81 -99 111 -138 30 -39 75 -96 100 -128 25 -31 55 -71 67 -88 l21 -31 -33 -44 c-50 -65 -132 -170 -195 -247 -30 -38 -68 -85 -85 -107 -16 -21 -41 -51 -53 -67 -13 -15 -20 -28 -14 -28 12 0 482 477 482 489 0 5 -84 97 -186 203 -103 106 -207 217 -232 246 -48 54 -71 68 -51 30z'/>`+
+        `<path fill='${user.shellPrimary||'#2E7BCB'}' d='M1235 640 c-38 -4 -113 -10 -165 -14 -52 -4 -162 -13 -245 -21 -253 -25 -503 -45 -563 -46 -62 0 -108 -13 -82 -22 8 -3 69 -8 135 -11 66 -4 136 -8 155 -11 19 -2 145 -13 280 -25 135 -11 262 -22 283 -25 21 -2 98 -8 172 -11 116 -6 135 -5 135 8 0 8 -11 25 -25 38 -14 13 -25 29 -25 36 0 20 39 82 55 88 8 3 15 10 15 16 0 11 -19 11 -125 0z m30 -50 c4 -6 2 -17 -4 -24 -6 -7 -8 -27 -5 -45 l7 -31 -99 5 c-55 4 -130 10 -169 15 -38 5 -106 12 -149 16 -44 4 -91 10 -105 14 -24 6 -23 7 14 13 22 4 94 12 160 18 105 10 153 14 312 26 18 2 35 -2 38 -7z'/>`+
+        `<path fill='${user.shellPrimary||'#2E7BCB'}' d='M1690 642 c0 -5 14 -26 30 -47 17 -21 30 -45 30 -53 0 -8 -17 -35 -37 -60 l-37 -45 80 6 c43 4 138 12 209 17 72 6 150 12 175 15 25 2 77 7 115 10 39 3 90 8 115 11 178 17 389 34 433 34 28 0 58 4 66 9 17 11 -8 14 -309 36 -118 8 -258 20 -310 25 -52 6 -187 17 -300 25 -113 8 -217 18 -232 21 -16 3 -28 1 -28 -4z m300 -62 c373 -29 403 -43 135 -65 -38 -3 -90 -8 -115 -10 -25 -3 -86 -7 -136 -11 l-90 -5 0 50 0 51 35 0 c20 0 97 -5 171 -10z'/>`+
+        `<path fill='${user.shellSecondary||'#FFD447'}' d='M1265 590 c4 -6 2 -17 -4 -24 -6 -7 -8 -27 -5 -45 l7 -31 -99 5 c-55 4 -130 10 -169 15 -38 5 -106 12 -149 16 -44 4 -91 10 -105 14 -24 6 -23 7 14 13 22 4 94 12 160 18 105 10 153 14 312 26 18 2 35 -2 38 -7 z'/>`+
+        `<path fill='${user.shellSecondary||'#FFD447'}' d='M1990 580 c373 -29 403 -43 135 -65 -38 -3 -90 -8 -115 -10 -25 -3 -86 -7 -136 -11 l-90 -5 0 50 0 51 35 0 c20 0 97 -5 171 -10z'/>`+
+        `</g></svg>`; }
+      function medal(r){ if(r===1) return '🥇'; if(r===2) return '🥈'; if(r===3) return '🥉'; return ''; }
+      function rankWithMedal(r){ if(r==null || r==='?') return r==='?'? '#?' : ''; return `#${r}${medal(r)}`; }
+      function desc(ev){ const name=ev.user?.name||'User'; const meters=(ev.totalMeters||0).toLocaleString('en-US'); const toRank=(ev.newRank!=null?ev.newRank: (ev.rank!=null? ev.rank: null)); const fromRank=ev.prevRank!=null? ev.prevRank: null; const to=(toRank!=null? rankWithMedal(toRank): (ev.type.startsWith('top3-')? '#?' : '')); const from=(fromRank!=null? rankWithMedal(fromRank): (ev.type==='top3-change'||ev.type==='top3-exit'? '#?' : '')); if(ev.type==='top3-enter') return `${icon(ev.user)} <strong>${name}</strong> entered Top 3 at ${to} (${meters} m)`; if(ev.type==='top3-exit') return `${icon(ev.user)} <strong>${name}</strong> left Top 3 from ${from} (${meters} m)`; if(ev.type==='top3-change') return `${icon(ev.user)} <strong>${name}</strong> moved from ${from} to ${to} (${meters} m)`; if(ev.type==='goal-milestone'){ const pct=Math.round(ev.milestonePct*100); const rankDisplay = toRank && toRank<=3? ` (${rankWithMedal(toRank)})` : ''; return `${icon(ev.user)} <strong>${name}</strong> reached ${pct}% goal (${meters} m)${rankDisplay}`; } return `${icon(ev.user)} Update`; }
+      function load(){ fetch('/api/updates?limit='+page+'&offset='+offset).then(r=>r.json()).then(data=>{ if(!data.ok) throw new Error('fail'); total=data.total; if(loadEl) loadEl.remove(); data.items.forEach(ev=>{ const li=document.createElement('li'); li.className='update-item'; li.style.cssText='display:flex;align-items:center;gap:.5rem;font-size:.75rem;background:var(--color-surface);padding:.4rem .5rem;border:1px solid var(--color-border);border-radius:4px;'; li.innerHTML=`<time datetime='${ev.date}' style='color:var(--color-text-light);font-size:.6rem;'>${(ev.date||'').slice(0,10)}</time> <span>${desc(ev)}</span>`; list.appendChild(li); }); offset+=data.items.length; moreBtn.style.display= offset < total ? 'inline-flex':'none'; }).catch(()=>{ if(loadEl){ loadEl.textContent='Failed to load updates'; } }); }
+      moreBtn && moreBtn.addEventListener('click',load); load();
+    })();
+  </script>
+</body>
+</html>

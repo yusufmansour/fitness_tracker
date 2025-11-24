@@ -1,0 +1,18 @@
+<header class="app-header">
+  <div class="brand">🏃 Activity Tracker</div>
+  <nav class="nav">
+    <% if (user) { %>
+      <a href="/dashboard" class="nav-link <%= activePage==='dashboard' ? 'active':'' %>" <%= activePage==='dashboard' ? 'aria-current="page"':'' %>>My Progress</a>
+      <a href="/entry/new" class="nav-link <%= activePage==='entry' ? 'active':'' %>" <%= activePage==='entry' ? 'aria-current="page"':'' %>>New Entry</a>
+      <a href="/leaderboard" class="nav-link <%= activePage==='leaderboard' ? 'active':'' %>" <%= activePage==='leaderboard' ? 'aria-current="page"':'' %>>Leaderboard</a>
+      <a href="/updates" class="nav-link <%= activePage==='updates' ? 'active':'' %>" <%= activePage==='updates' ? 'aria-current="page"':'' %>>Team Updates</a>
+      <a href="/settings" class="nav-link <%= activePage==='settings' ? 'active':'' %>" <%= activePage==='settings' ? 'aria-current="page"':'' %>>Settings</a>
+      <button id="toggleTheme" class="btn-icon" aria-label="Toggle theme">🌓</button>
+      <a href="/logout" class="nav-link danger">Logout</a>
+    <% } else { %>
+      <a href="/login" class="nav-link <%= activePage==='login' ? 'active':'' %>" <%= activePage==='login' ? 'aria-current="page"':'' %>>Login</a>
+      <a href="/register" class="nav-link <%= activePage==='register' ? 'active':'' %>" <%= activePage==='register' ? 'aria-current="page"':'' %>>Register</a>
+      <button id="toggleTheme" class="btn-icon" aria-label="Toggle theme">🌓</button>
+    <% } %>
+  </nav>
+</header>

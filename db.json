@@ -1,0 +1,363 @@
+{
+  "users": [
+    {
+      "id": "1763848753335",
+      "email": "yusuf.m.mansour@gmail.com",
+      "password": "$2a$10$8dYt74ZcR77rPFP33cGLde0zOz68ywYaK8s.zNmyrBfE2LxR2L1U6",
+      "displayName": "Yusuf",
+      "logbookToken": "wVQ5j1e84za3Ezmrz5JR2CNa3dHbi7GfOZfkb33a",
+      "logbookLastSync": {
+        "when": "2025-11-24T02:43:32.955Z",
+        "imported": 0,
+        "scanned": 4
+      },
+      "shellPrimary": "#600721",
+      "shellSecondary": "#c306e8",
+      "oarColor": "#6f7101",
+      "onboarded": true,
+      "goalMeters": 100000
+    },
+    {
+      "id": "1763852509243",
+      "email": "test@test.com",
+      "password": "$2a$10$QT0qzq5dGCRSENm0scpreeiBAi.oRFGWrZVgsOsEgahwzz/uZHkGG",
+      "displayName": "Ben",
+      "shellPrimary": "#0cb491",
+      "shellSecondary": "#ff0000",
+      "oarColor": "#891a05",
+      "onboarded": true
+    },
+    {
+      "id": "1763933524521",
+      "email": "test1@test.com",
+      "password": "$2a$10$EjkEv6/TEeaXmCOg6cfiLOfozn6G2DzuUcuqzM2V9ztHhFsE7Az.S",
+      "displayName": "test1",
+      "shellPrimary": "#2E7BCB",
+      "shellSecondary": "#FFD447",
+      "oarColor": "#FF4F4F"
+    },
+    {
+      "id": "1763934028406",
+      "email": "t@t.com",
+      "password": "$2a$10$kav6Uy/fI6EF0y/sgPXlaOaQm9pASPwPBo4Kz3Jmp.xtTjIXefLQ2",
+      "displayName": "t",
+      "shellPrimary": "#2E7BCB",
+      "shellSecondary": "#FFD447",
+      "oarColor": "#FF4F4F"
+    },
+    {
+      "id": "1763934333187",
+      "email": "q@t.com",
+      "password": "$2a$10$VjjlWxwkDLLU7I2gfRrsYeWLnpI7sF9qeMd4o5rMpP77dr2AqQjlW",
+      "displayName": "q",
+      "shellPrimary": "#114f92",
+      "shellSecondary": "#ffd447",
+      "oarColor": "#ff4f4f",
+      "onboarded": false
+    },
+    {
+      "id": "1763939123527",
+      "email": "w@w.com",
+      "password": "$2a$10$VaB9IRGqQrA8RYwL.Bw9F.kOUVrAJM0RRrpwCh4tSdwUhXyaWECbO",
+      "displayName": "w",
+      "shellPrimary": "#ff1a1a",
+      "shellSecondary": "#664e00",
+      "oarColor": "#26c526",
+      "onboarded": true
+    },
+    {
+      "id": "1763951893697",
+      "email": "e@e.com",
+      "password": "$2a$10$glp2KZBEQxqk7XBf6vbpZOu7w7AK2Nxk3ubJb09yWFCsUIvgwZ30G",
+      "displayName": "e",
+      "shellPrimary": "#3aa52c",
+      "shellSecondary": "#0e5d2a",
+      "oarColor": "#ff0f0f",
+      "onboarded": true,
+      "goalMeters": 200000,
+      "logbookToken": "wVQ5j1e84za3Ezmrz5JR2CNa3dHbi7GfOZfkb33a",
+      "logbookLastSync": {
+        "when": "2025-11-24T02:45:28.375Z",
+        "imported": 1,
+        "scanned": 5
+      }
+    },
+    {
+      "id": "1763957105761",
+      "email": "a@a.com",
+      "password": "$2a$10$tKSMpe5sIkgo541RJ0iWSen68MkLvzrMKlYVxNJfBVCbXVs9fFhcy",
+      "displayName": "a",
+      "shellPrimary": "#2e7bcb",
+      "shellSecondary": "#ffd447",
+      "oarColor": "#ff4f4f",
+      "onboarded": true,
+      "goalMeters": 100000
+    }
+  ],
+  "entries": [
+    {
+      "id": "1763852468506",
+      "userId": "1763848753335",
+      "date": "2025-11-22",
+      "value": 10000
+    },
+    {
+      "id": "1763852520750",
+      "userId": "1763852509243",
+      "date": "2025-11-21",
+      "value": 15000
+    },
+    {
+      "id": "1763876926087hxp23p0n05u",
+      "userId": "1763848753335",
+      "date": "2025-11-23",
+      "value": 10000,
+      "origin": "concept2",
+      "remoteId": "108765529"
+    },
+    {
+      "id": "1763876926087irhs5xxol9",
+      "userId": "1763848753335",
+      "date": "2024-12-02",
+      "value": 1019,
+      "origin": "concept2",
+      "remoteId": "94731260"
+    },
+    {
+      "id": "1763876926087zxsgrw9n6",
+      "userId": "1763848753335",
+      "date": "2024-12-01",
+      "value": 1522,
+      "origin": "concept2",
+      "remoteId": "94697598"
+    },
+    {
+      "id": "17638769260874dp0dwu7b1n",
+      "userId": "1763848753335",
+      "date": "2024-11-28",
+      "value": 2073,
+      "origin": "concept2",
+      "remoteId": "94556048"
+    },
+    {
+      "id": "1763939156775xs6ydmxn1u8",
+      "userId": "1763939123527",
+      "value": 10211,
+      "createdAt": "2025-11-23T23:05:56.775Z"
+    },
+    {
+      "id": "17639444568316u94xd038hw",
+      "userId": "1763939123527",
+      "value": 111111,
+      "createdAt": "2025-11-24T00:34:16.831Z"
+    },
+    {
+      "id": "1763951935684fbvu20p02hf",
+      "userId": "1763951893697",
+      "value": 10000,
+      "createdAt": "2025-11-24T02:38:55.684Z"
+    },
+    {
+      "id": "1763951948013cbo872lra79",
+      "userId": "1763951893697",
+      "value": 50000,
+      "createdAt": "2025-11-24T02:39:08.013Z"
+    },
+    {
+      "id": "17639523283691nshjbn3kie",
+      "userId": "1763951893697",
+      "date": "2025-11-23",
+      "value": 3000,
+      "origin": "concept2",
+      "remoteId": "108797740"
+    },
+    {
+      "id": "1763957122317ecvpoxrk394",
+      "userId": "1763957105761",
+      "value": 111111,
+      "createdAt": "2025-11-24T04:05:22.317Z"
+    },
+    {
+      "id": "1763957149566f5hzcw6ms6u",
+      "userId": "1763957105761",
+      "value": 20000,
+      "createdAt": "2025-11-24T04:05:49.566Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "1763944456832kxg7rth8ybk",
+      "type": "top3-change",
+      "userId": "1763848753335",
+      "rank": 2,
+      "totalMeters": 24614,
+      "date": "2025-11-24T00:34:16.832Z",
+      "createdAt": "2025-11-24T00:34:16.832Z"
+    },
+    {
+      "id": "17639444568321ula2j8w9cw",
+      "type": "top3-change",
+      "userId": "1763852509243",
+      "rank": 3,
+      "totalMeters": 15000,
+      "date": "2025-11-24T00:34:16.832Z",
+      "createdAt": "2025-11-24T00:34:16.832Z"
+    },
+    {
+      "id": "1763944456832gmuycvlsew6",
+      "type": "top3-change",
+      "userId": "1763939123527",
+      "rank": 1,
+      "totalMeters": 121322,
+      "date": "2025-11-24T00:34:16.832Z",
+      "createdAt": "2025-11-24T00:34:16.832Z"
+    },
+    {
+      "id": "1763951948013xq30mlan11",
+      "type": "top3-change",
+      "userId": "1763848753335",
+      "prevRank": 2,
+      "newRank": 3,
+      "totalMeters": 24614,
+      "date": "2025-11-24T02:39:08.013Z",
+      "createdAt": "2025-11-24T02:39:08.013Z"
+    },
+    {
+      "id": "1763951948013unhzhqtnznf",
+      "type": "top3-exit",
+      "userId": "1763852509243",
+      "prevRank": 3,
+      "newRank": null,
+      "totalMeters": 15000,
+      "date": "2025-11-24T02:39:08.013Z",
+      "createdAt": "2025-11-24T02:39:08.013Z"
+    },
+    {
+      "id": "1763951948014x8pa0v882u",
+      "type": "goal-milestone",
+      "userId": "1763951893697",
+      "milestonePct": 0.1,
+      "prevRank": 4,
+      "newRank": 2,
+      "totalMeters": 60000,
+      "date": "2025-11-24T02:39:08.013Z",
+      "createdAt": "2025-11-24T02:39:08.013Z"
+    },
+    {
+      "id": "1763951948014p3vd4b830d",
+      "type": "goal-milestone",
+      "userId": "1763951893697",
+      "milestonePct": 0.25,
+      "prevRank": 4,
+      "newRank": 2,
+      "totalMeters": 60000,
+      "date": "2025-11-24T02:39:08.013Z",
+      "createdAt": "2025-11-24T02:39:08.013Z"
+    },
+    {
+      "id": "1763957122317qu9hs2vgaa",
+      "type": "top3-change",
+      "userId": "1763951893697",
+      "prevRank": 2,
+      "newRank": 3,
+      "totalMeters": 63000,
+      "date": "2025-11-24T04:05:22.317Z",
+      "createdAt": "2025-11-24T04:05:22.317Z"
+    },
+    {
+      "id": "1763957122317xdokrx6b5ao",
+      "type": "top3-exit",
+      "userId": "1763848753335",
+      "prevRank": 3,
+      "newRank": null,
+      "totalMeters": 24614,
+      "date": "2025-11-24T04:05:22.317Z",
+      "createdAt": "2025-11-24T04:05:22.317Z"
+    },
+    {
+      "id": "1763957122317b84bxpemc6",
+      "type": "top3-enter",
+      "userId": "1763957105761",
+      "prevRank": null,
+      "newRank": 2,
+      "totalMeters": 111111,
+      "date": "2025-11-24T04:05:22.317Z",
+      "createdAt": "2025-11-24T04:05:22.317Z"
+    },
+    {
+      "id": "1763957122318q5l6612q73",
+      "type": "goal-milestone",
+      "userId": "1763957105761",
+      "milestonePct": 0.1,
+      "prevRank": null,
+      "newRank": 2,
+      "totalMeters": 111111,
+      "date": "2025-11-24T04:05:22.317Z",
+      "createdAt": "2025-11-24T04:05:22.317Z"
+    },
+    {
+      "id": "17639571223191l5pjqmmpz1",
+      "type": "goal-milestone",
+      "userId": "1763957105761",
+      "milestonePct": 0.25,
+      "prevRank": null,
+      "newRank": 2,
+      "totalMeters": 111111,
+      "date": "2025-11-24T04:05:22.317Z",
+      "createdAt": "2025-11-24T04:05:22.317Z"
+    },
+    {
+      "id": "1763957122319nkbmmu54gnk",
+      "type": "goal-milestone",
+      "userId": "1763957105761",
+      "milestonePct": 0.5,
+      "prevRank": null,
+      "newRank": 2,
+      "totalMeters": 111111,
+      "date": "2025-11-24T04:05:22.317Z",
+      "createdAt": "2025-11-24T04:05:22.317Z"
+    },
+    {
+      "id": "1763957122319f9ku32ctq0f",
+      "type": "goal-milestone",
+      "userId": "1763957105761",
+      "milestonePct": 0.75,
+      "prevRank": null,
+      "newRank": 2,
+      "totalMeters": 111111,
+      "date": "2025-11-24T04:05:22.317Z",
+      "createdAt": "2025-11-24T04:05:22.317Z"
+    },
+    {
+      "id": "1763957122319wtoa43svos",
+      "type": "goal-milestone",
+      "userId": "1763957105761",
+      "milestonePct": 1,
+      "prevRank": null,
+      "newRank": 2,
+      "totalMeters": 111111,
+      "date": "2025-11-24T04:05:22.317Z",
+      "createdAt": "2025-11-24T04:05:22.317Z"
+    },
+    {
+      "id": "1763957149566flyet91m42",
+      "type": "top3-change",
+      "userId": "1763939123527",
+      "prevRank": 1,
+      "newRank": 2,
+      "totalMeters": 121322,
+      "date": "2025-11-24T04:05:49.566Z",
+      "createdAt": "2025-11-24T04:05:49.566Z"
+    },
+    {
+      "id": "1763957149566kb8tzxs2kg",
+      "type": "top3-change",
+      "userId": "1763957105761",
+      "prevRank": 2,
+      "newRank": 1,
+      "totalMeters": 131111,
+      "date": "2025-11-24T04:05:49.566Z",
+      "createdAt": "2025-11-24T04:05:49.566Z"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login - Activity Tracker</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app">
+  <%- include('partials/header', { activePage:'login', user:null }) %>
+  <main class="app-main" style="grid-template-columns:1fr;">
+    <section class="card form-card" style="max-width:420px; margin:0 auto;">
+      <h1 class="page-title" style="font-size:1.6rem;">Login</h1>
+      <% if (typeof error !== 'undefined') { %>
+        <div class="alert error" role="alert"><%= error %></div>
+      <% } %>
+      <form method="post" class="form-grid" autocomplete="off">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required autofocus>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required>
+        </div>
+        <div class="actions">
+          <button class="btn" type="submit">Login</button>
+          <a href="/register" class="link-inline">Need an account?</a>
+        </div>
+      </form>
+    </section>
+  </main>
+  <footer class="app-footer"><small>&copy; <span id="year"></span></small></footer>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const btn = document.getElementById('toggleTheme');
+    const stored = localStorage.getItem('theme'); if(stored){document.documentElement.dataset.theme=stored;}
+    btn.addEventListener('click',()=>{const next=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=next;localStorage.setItem('theme',next);});
+  </script>
+</body>
+</html>
