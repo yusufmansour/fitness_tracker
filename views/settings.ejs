@@ -15,25 +15,26 @@
       <% if (error) { %><div class="alert error"><%= error %></div><% } %>
 
       <div class="tabs" role="tablist">
-        <button class="tab-btn <%= activeTab==='profile' || !activeTab ? 'active':'' %>" data-tab="profile" type="button" role="tab">Profile</button>
-        <button class="tab-btn <%= activeTab==='token' ? 'active':'' %>" data-tab="token" type="button" role="tab">API Token</button>
-        <button class="tab-btn <%= activeTab==='shell' ? 'active':'' %>" data-tab="shell" type="button" role="tab">Shell</button>
+        <% const tabVal = (typeof activeTab !== 'undefined' && activeTab) ? activeTab : 'profile'; %>
+        <button class="tab-btn <%= tabVal==='profile' ? 'active':'' %>" data-tab="profile" type="button" role="tab">Profile</button>
+        <button class="tab-btn <%= tabVal==='token' ? 'active':'' %>" data-tab="token" type="button" role="tab">API Token</button>
+        <button class="tab-btn <%= tabVal==='shell' ? 'active':'' %>" data-tab="shell" type="button" role="tab">Shell</button>
       </div>
 
       <div class="tab-panels">
-        <div class="tab-panel <%= activeTab==='profile' || !activeTab ? 'active':'' %>" id="tab-profile" <%= activeTab==='profile' || !activeTab ? '' : 'hidden' %>>
+        <div class="tab-panel <%= tabVal==='profile' ? 'active':'' %>" id="tab-profile" <%= tabVal==='profile' ? '' : 'hidden' %>>
           <form method="post" action="/settings/profile" class="form-grid">
             <div class="field">
               <label for="displayName">Display Name</label>
               <input id="displayName" name="displayName" type="text" maxlength="40" value="<%= user && user.displayName ? user.displayName : '' %>" required>
             </div>
             <div class="actions">
-              <button class="btn" type="submit">Save Profile</button>
+              <button class="btn" type="submit" id="saveProfileBtn">Save Profile</button>
             </div>
           </form>
         </div>
 
-        <div class="tab-panel <%= activeTab==='token' ? 'active':'' %>" id="tab-token" <%= activeTab==='token' ? '' : 'hidden' %>>
+        <div class="tab-panel <%= tabVal==='token' ? 'active':'' %>" id="tab-token" <%= tabVal==='token' ? '' : 'hidden' %>>
           <form method="post" action="/settings/token" class="form-grid">
             <div class="field">
               <label for="logbookToken">Concept2 Logbook Token</label>
@@ -41,15 +42,16 @@
               <small class="subtle" style="font-size:.65rem;">Auto-sync runs every 30 min if token present.</small>
             </div>
             <div class="actions">
-              <button class="btn" type="submit">Save Token</button>
-              <button class="btn" type="button" id="debugBtn" style="background:var(--color-text-light);">Debug</button>
+              <button class="btn" type="submit" id="saveTokenBtn">Save Token</button>
+              <button class="btn" type="button" id="debugBtn" class="btn secondary">Debug</button>
+              <button class="btn" type="button" id="syncNowBtn" style="background:var(--color-warning);">Sync Now</button>
             </div>
             <p class="subtle" id="syncStatus" style="font-size:.7rem;"></p>
           </form>
         </div>
 
-        <div class="tab-panel <%= activeTab==='shell' ? 'active':'' %>" id="tab-shell" <%= activeTab==='shell' ? '' : 'hidden' %>>
-          <form method="post" action="/settings/shell" class="form-grid">
+        <div class="tab-panel <%= tabVal==='shell' ? 'active':'' %>" id="tab-shell" <%= tabVal==='shell' ? '' : 'hidden' %>>
+          <form method="post" action="/settings/shell" class="form-grid" id="shellForm">
             <div class="field" style="gap:.5rem; order:0;">
               <label>Shell Preview</label>
               <div id="shellPreview" style="background:var(--color-surface); padding:.5rem; border:1px solid var(--color-border); border-radius:var(--radius-sm); display:inline-block;">
@@ -67,25 +69,28 @@
             <div class="field" style="display:flex; flex-direction:column;">
               <label for="shellPrimary">Shell Primary</label>
               <div style="display:flex; align-items:center; gap:.5rem;">
-                <input id="shellPrimary" name="shellPrimary" type="color" value="<%= user && user.shellPrimary ? user.shellPrimary : '#2E7BCB' %>">
-                <span class="color-code" id="shellPrimaryCode"><%= user && user.shellPrimary ? user.shellPrimary : '#2E7BCB' %></span>
+                <input id="shellPrimary" name="shellPrimary" type="color" value="<%= user && user.shellPrimary ? user.shellPrimary : '#000000' %>">
+                <span class="color-code" id="shellPrimaryCode"><%= user && user.shellPrimary ? user.shellPrimary : '#000000' %></span>
               </div>
             </div>
             <div class="field" style="display:flex; flex-direction:column;">
               <label for="shellSecondary">Shell Secondary</label>
               <div style="display:flex; align-items:center; gap:.5rem;">
-                <input id="shellSecondary" name="shellSecondary" type="color" value="<%= user && user.shellSecondary ? user.shellSecondary : '#FFD447' %>">
-                <span class="color-code" id="shellSecondaryCode"><%= user && user.shellSecondary ? user.shellSecondary : '#FFD447' %></span>
+                <input id="shellSecondary" name="shellSecondary" type="color" value="<%= user && user.shellSecondary ? user.shellSecondary : '#000000' %>">
+                <span class="color-code" id="shellSecondaryCode"><%= user && user.shellSecondary ? user.shellSecondary : '#000000' %></span>
               </div>
             </div>
             <div class="field" style="display:flex; flex-direction:column;">
               <label for="oarColor">Oar Color</label>
               <div style="display:flex; align-items:center; gap:.5rem;">
-                <input id="oarColor" name="oarColor" type="color" value="<%= user && user.oarColor ? user.oarColor : '#FF4F4F' %>">
-                <span class="color-code" id="oarColorCode"><%= user && user.oarColor ? user.oarColor : '#FF4F4F' %></span>
+                <input id="oarColor" name="oarColor" type="color" value="<%= user && user.oarColor ? user.oarColor : '#000000' %>">
+                <span class="color-code" id="oarColorCode"><%= user && user.oarColor ? user.oarColor : '#000000' %></span>
               </div>
             </div>
-            <!-- Removed save button; auto preview only -->
+            <div class="actions" style="margin-top:.5rem;">
+              <button class="btn" type="submit" id="saveShellBtn">Save Shell Colors</button>
+              <button class="btn" type="button" id="randomizeShellBtn" style="background:var(--color-text-light);">Randomize</button>
+            </div>
           </form>
         </div>
       </div>
@@ -101,28 +106,31 @@
   </main>
   <footer class="app-footer"><small>&copy; <span id="year"></span></small></footer>
   <script>
+    // Footer year update only; theme toggle removed (always dark mode)
     document.getElementById('year').textContent = new Date().getFullYear();
-    const btn = document.getElementById('toggleTheme'); const stored = localStorage.getItem('theme'); if(stored){document.documentElement.dataset.theme=stored;}
-    btn.addEventListener('click',()=>{const next=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=next;localStorage.setItem('theme',next);});
 
     // Tabs
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const panels = document.querySelectorAll('.tab-panel');
-    tabButtons.forEach(b=> b.addEventListener('click', ()=>{
-      tabButtons.forEach(x=>x.classList.remove('active'));
-      panels.forEach(p=>{p.classList.remove('active'); p.hidden=true;});
-      b.classList.add('active');
-      const id = 'tab-' + b.dataset.tab; const panel = document.getElementById(id); panel.hidden=false; panel.classList.add('active');
-    }));
+    (function(){
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      const panels = document.querySelectorAll('.tab-panel');
+      tabButtons.forEach(b=> b.addEventListener('click', ()=>{
+        tabButtons.forEach(x=>x.classList.remove('active'));
+        panels.forEach(p=>{p.classList.remove('active'); p.hidden=true;});
+        b.classList.add('active');
+        const id = 'tab-' + b.dataset.tab; const panel = document.getElementById(id); panel.hidden=false; panel.classList.add('active');
+      }));
+    })();
 
     // Logbook (token tab)
     const debugBtn = document.getElementById('debugBtn');
     const syncStatus = document.getElementById('syncStatus');
     debugBtn && debugBtn.addEventListener('click',()=>{ if(!syncStatus) return; syncStatus.textContent='Debug…'; fetch('/api/debug/logbook/profile').then(r=>r.json()).then(d=>{ syncStatus.textContent = d.ok? `Profile keys: ${Object.keys(d.profile||{}).slice(0,6).join(',')}`:'Debug failed'; }).catch(()=> syncStatus.textContent='Debug error'); });
+    const syncBtn=document.getElementById('syncNowBtn');
+    syncBtn && syncBtn.addEventListener('click',()=>{ if(!syncStatus) return; syncStatus.textContent='Syncing…'; fetch('/sync/logbook').then(r=>r.json()).then(d=>{ syncStatus.textContent = d.ok? `Imported ${d.imported} / scanned ${d.candidate}`:'Sync failed'; }).catch(()=> syncStatus.textContent='Sync error'); });
 
     // Shell preview
     (function(){
-      function updateShellPreview(){ const svg=document.getElementById('settingsShellSvg'); if(!svg) return; const p=document.getElementById('shellPrimary'); const s=document.getElementById('shellSecondary'); const o=document.getElementById('oarColor'); svg.querySelectorAll('.primary').forEach(el=>el.setAttribute('fill',p?p.value:'#2E7BCB')); svg.querySelectorAll('.secondary').forEach(el=>el.setAttribute('fill',s?s.value:'#FFD447')); svg.querySelectorAll('.oar').forEach(el=>el.setAttribute('fill',o?o.value:'#FF4F4F')); }
+      function updateShellPreview(){ const svg=document.getElementById('shellSvg'); if(!svg) return; const p=document.getElementById('shellPrimary'); const s=document.getElementById('shellSecondary'); const o=document.getElementById('oarColor'); svg.querySelectorAll('.primary').forEach(el=>el.setAttribute('fill',p?p.value:'#000000')); svg.querySelectorAll('.secondary').forEach(el=>el.setAttribute('fill',s?s.value:'#000000')); svg.querySelectorAll('.oar').forEach(el=>el.setAttribute('fill',o?o.value:'#000000')); }
       ['shellPrimary','shellSecondary','oarColor'].forEach(id=>{ const el=document.getElementById(id); el && el.addEventListener('input',updateShellPreview); el && el.addEventListener('change',e=>{ const val=e.target.value; navigator.clipboard && navigator.clipboard.writeText(val).catch(()=>{}); flash('Copied '+val); }); });
       updateShellPreview();
       const status=document.createElement('div');
@@ -140,12 +148,12 @@
       const secCode=document.getElementById('shellSecondaryCode');
       const oarCode=document.getElementById('oarColorCode');
       // Use existing preview (id settingsShellPreview or first svg)
-      const svg=document.getElementById('settingsShellSvg') || document.querySelector('#settingsShellPreview svg') || document.querySelector('svg');
+      const svg=document.getElementById('shellSvg') || document.querySelector('#shellPreview svg') || document.querySelector('svg');
       function apply(){
         if(svg){
-          svg.querySelectorAll('.primary').forEach(el=>el.setAttribute('fill',prim.value));
-          svg.querySelectorAll('.secondary').forEach(el=>el.setAttribute('fill',sec.value));
-          svg.querySelectorAll('.oar').forEach(el=>el.setAttribute('fill',oar.value));
+          svg.querySelectorAll('.primary').forEach(el=>el.setAttribute('fill',prim.value||'#000000'));
+          svg.querySelectorAll('.secondary').forEach(el=>el.setAttribute('fill',sec.value||'#000000'));
+          svg.querySelectorAll('.oar').forEach(el=>el.setAttribute('fill',oar.value||'#000000'));
         }
         if(primCode) primCode.textContent=prim.value;
         if(secCode) secCode.textContent=sec.value;
@@ -163,7 +171,10 @@
       const toast=document.querySelector('.copy-status')||(()=>{const t=document.createElement('div');t.className='copy-status';document.body.appendChild(t);return t;})();
       function show(msg){toast.textContent=msg;toast.style.opacity='1';clearTimeout(toast._h);toast._h=setTimeout(()=>toast.style.opacity='0',1400);}
       function save(){fetch('/settings/shell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({shellPrimary:prim.value,shellSecondary:sec.value,oarColor:oar.value})}).then(r=>r.ok?show('Shell colors saved'):show('Save failed')).catch(()=>show('Save failed'));}
-      [prim,sec,oar].forEach(el=>{ if(!el) return; el.addEventListener('change',save); });
+      const saveShellBtn=document.getElementById('saveShellBtn');
+      saveShellBtn && saveShellBtn.addEventListener('click',e=>{ e.preventDefault(); save(); });
+      const randomBtn=document.getElementById('randomizeShellBtn');
+      randomBtn && randomBtn.addEventListener('click',()=>{ function rand(){return '#'+Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6,'0');} prim.value=rand(); sec.value=rand(); oar.value=rand(); prim.dispatchEvent(new Event('input')); sec.dispatchEvent(new Event('input')); oar.dispatchEvent(new Event('input')); });
     })();
   </script>
 </body>

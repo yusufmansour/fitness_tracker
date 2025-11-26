@@ -11,11 +11,30 @@
         "imported": 0,
         "scanned": 4
       },
-      "shellPrimary": "#600721",
-      "shellSecondary": "#c306e8",
-      "oarColor": "#6f7101",
+      "shellPrimary": "#e288fd",
+      "shellSecondary": "#d1ff05",
+      "oarColor": "#374d94",
       "onboarded": true,
-      "goalMeters": 100000
+      "goalMeters": 100000,
+      "xp": 1594,
+      "meterBank": 0,
+      "claimedChallenges": [
+        "day_distance_5000",
+        "day_distance_10000",
+        "day_distance_3000",
+        "streak_1",
+        "total_25000",
+        "day_distance_15000",
+        "total_50000",
+        "day_distance_20000",
+        "day_distance_30000",
+        "total_100000",
+        "total_150000",
+        "total_300000",
+        "total_200000"
+      ],
+      "displayConfirmed": true,
+      "shellConfirmed": true
     },
     {
       "id": "1763852509243",
@@ -25,7 +44,12 @@
       "shellPrimary": "#0cb491",
       "shellSecondary": "#ff0000",
       "oarColor": "#891a05",
-      "onboarded": true
+      "onboarded": true,
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "displayConfirmed": true,
+      "shellConfirmed": true
     },
     {
       "id": "1763933524521",
@@ -34,16 +58,29 @@
       "displayName": "test1",
       "shellPrimary": "#2E7BCB",
       "shellSecondary": "#FFD447",
-      "oarColor": "#FF4F4F"
+      "oarColor": "#FF4F4F",
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "displayConfirmed": false,
+      "shellConfirmed": false
     },
     {
       "id": "1763934028406",
       "email": "t@t.com",
       "password": "$2a$10$kav6Uy/fI6EF0y/sgPXlaOaQm9pASPwPBo4Kz3Jmp.xtTjIXefLQ2",
-      "displayName": "t",
+      "displayName": "Tn",
       "shellPrimary": "#2E7BCB",
       "shellSecondary": "#FFD447",
-      "oarColor": "#FF4F4F"
+      "oarColor": "#FF4F4F",
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "displayConfirmed": true,
+      "goalMeters": 200000,
+      "logbookToken": "wVQ5j1e84za3Ezmrz5JR2CNa3dHbi7GfOZ",
+      "onboarded": true,
+      "shellConfirmed": true
     },
     {
       "id": "1763934333187",
@@ -53,7 +90,12 @@
       "shellPrimary": "#114f92",
       "shellSecondary": "#ffd447",
       "oarColor": "#ff4f4f",
-      "onboarded": false
+      "onboarded": false,
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "displayConfirmed": false,
+      "shellConfirmed": false
     },
     {
       "id": "1763939123527",
@@ -63,7 +105,12 @@
       "shellPrimary": "#ff1a1a",
       "shellSecondary": "#664e00",
       "oarColor": "#26c526",
-      "onboarded": true
+      "onboarded": true,
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "displayConfirmed": true,
+      "shellConfirmed": true
     },
     {
       "id": "1763951893697",
@@ -80,7 +127,12 @@
         "when": "2025-11-24T02:45:28.375Z",
         "imported": 1,
         "scanned": 5
-      }
+      },
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "displayConfirmed": true,
+      "shellConfirmed": true
     },
     {
       "id": "1763957105761",
@@ -91,7 +143,119 @@
       "shellSecondary": "#ffd447",
       "oarColor": "#ff4f4f",
       "onboarded": true,
-      "goalMeters": 100000
+      "goalMeters": 100000,
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "displayConfirmed": true,
+      "shellConfirmed": true
+    },
+    {
+      "id": "1764168365780",
+      "email": "b@b.com",
+      "password": "$2a$10$SmEIYcLpCk6duX56OpA0UuWDudbukt5lEHdJENDJSkEpaTxE.ojle",
+      "displayName": "b",
+      "shellPrimary": "#ff0000",
+      "shellSecondary": "#3700ff",
+      "oarColor": "#eeff05",
+      "onboarded": true,
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "goalMeters": 20000,
+      "displayConfirmed": true,
+      "shellConfirmed": true
+    },
+    {
+      "id": "1764169707002",
+      "email": "m@m.com",
+      "password": "$2a$10$urDVoy9Hs1L87nZKe8HtB.AM6fFUNeLkGryzhj4tcNNwZPyJnoSd6",
+      "displayName": "m",
+      "shellPrimary": "#ff0a0a",
+      "shellSecondary": "#4800ff",
+      "oarColor": "#a2b159",
+      "onboarded": true,
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "goalMeters": 200000,
+      "displayConfirmed": true,
+      "shellConfirmed": true
+    },
+    {
+      "id": "1764170379769",
+      "email": "r@r.com",
+      "password": "$2a$10$eMe9w1WzUZNLsR1E0HOH8OAZ1GIthYepj2rvSiw2JQTDu/hwVSZS.",
+      "displayName": "r",
+      "shellPrimary": "#000000",
+      "shellSecondary": "#000000",
+      "oarColor": "#000000",
+      "onboarded": false,
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "displayConfirmed": false,
+      "shellConfirmed": false
+    },
+    {
+      "id": "1764170856863",
+      "email": "y@y.com",
+      "password": "$2a$10$4H6HlLCQQdsg431YbUV/e.SuE9fNGlnXU6qw8xZ/h/uAHg/Xb7B6i",
+      "displayName": "y",
+      "displayConfirmed": true,
+      "shellPrimary": "#000000",
+      "shellSecondary": "#000000",
+      "oarColor": "#000000",
+      "onboarded": true,
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "goalMeters": 200000,
+      "logbookToken": "wVQ5j1e84za3Ezmrz5JR2CNa3dHbi7GfOZ",
+      "shellConfirmed": true
+    },
+    {
+      "id": "1764171032143",
+      "email": "g@g.com",
+      "password": "$2a$10$lQYPhaGiH.u/sbc5fMZzjuG.ti.DE580.kJXFMRysROzAU3CYmaqa",
+      "displayName": "g",
+      "displayConfirmed": true,
+      "shellPrimary": "#000000",
+      "shellSecondary": "#000000",
+      "oarColor": "#000000",
+      "onboarded": false,
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "goalMeters": 1,
+      "shellConfirmed": false
+    },
+    {
+      "id": "1764171570025",
+      "email": "p@p.com",
+      "password": "$2a$10$IY9TqsZwPlSeAAc1IVrDXe5SqaGQGkAGAJUfJToborKH6gEgKnuDO",
+      "displayName": "p",
+      "displayConfirmed": true,
+      "shellConfirmed": true,
+      "shellPrimary": "#ff8080",
+      "shellSecondary": "#ff75e6",
+      "oarColor": "#8914d7",
+      "onboarded": true,
+      "xp": 286,
+      "meterBank": 0,
+      "claimedChallenges": [
+        "streak_1",
+        "day_distance_3000",
+        "day_distance_10000",
+        "day_distance_5000",
+        "day_distance_20000",
+        "day_distance_30000",
+        "total_25000",
+        "total_50000",
+        "day_distance_15000"
+      ],
+      "goalMeters": 1,
+      "logbookToken": "wVQ5j1e84za3Ezmrz5JR2CNa3dHbi7GfOZ"
     }
   ],
   "entries": [
@@ -182,6 +346,125 @@
       "userId": "1763957105761",
       "value": 20000,
       "createdAt": "2025-11-24T04:05:49.566Z"
+    },
+    {
+      "id": "1764165973309t6vzweynce",
+      "userId": "1763848753335",
+      "value": 1000,
+      "createdAt": "2025-11-26T14:06:13.309Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764166987767dop1ih2f1b",
+      "userId": "1763848753335",
+      "value": 500,
+      "createdAt": "2025-11-26T14:23:07.767Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764167249748mruni38drih",
+      "userId": "1763848753335",
+      "value": 1000,
+      "createdAt": "2025-11-26T14:27:29.749Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764167257949f6x11azr7bl",
+      "userId": "1763848753335",
+      "value": 10000,
+      "createdAt": "2025-11-26T14:27:37.949Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764167397018o9r9o75015",
+      "userId": "1763848753335",
+      "value": 10000,
+      "createdAt": "2025-11-26T14:29:57.018Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764167408208znm1xv7e3ob",
+      "userId": "1763848753335",
+      "value": 3000,
+      "createdAt": "2025-11-26T14:30:08.208Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764168077940lgpokpulzi8",
+      "userId": "1763848753335",
+      "value": 15000,
+      "createdAt": "2025-11-26T14:41:17.940Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764168595695x3flbw66p8",
+      "userId": "1763848753335",
+      "value": 10000,
+      "createdAt": "2025-11-26T14:49:55.695Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "17641686167198xwzun4fo6",
+      "userId": "1763848753335",
+      "value": 40500,
+      "createdAt": "2025-11-26T14:50:16.720Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764169144085as2v02vrdr4",
+      "userId": "1763848753335",
+      "value": 6000,
+      "createdAt": "2025-11-26T14:59:04.085Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764169498890vngychnpor",
+      "userId": "1763848753335",
+      "value": 1000000,
+      "createdAt": "2025-11-26T15:04:58.890Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "17641716132984ai0co7z24x",
+      "userId": "1764171570025",
+      "value": 1000,
+      "createdAt": "2025-11-26T15:40:13.298Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764171626922h2wlvu5lio",
+      "userId": "1764171570025",
+      "value": 3000,
+      "createdAt": "2025-11-26T15:40:26.922Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "17641716383728cs3c0d6o6k",
+      "userId": "1764171570025",
+      "value": 6000,
+      "createdAt": "2025-11-26T15:40:38.372Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764171656096ezepat6bvc",
+      "userId": "1764171570025",
+      "value": 50000,
+      "createdAt": "2025-11-26T15:40:56.096Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764171694693gzwzorf4zy",
+      "userId": "1764171570025",
+      "value": 4000,
+      "createdAt": "2025-11-26T15:41:34.693Z",
+      "date": "2025-11-26"
+    },
+    {
+      "id": "1764171728463t0r0ww4yw8i",
+      "userId": "1764171570025",
+      "value": 100000,
+      "createdAt": "2025-11-26T15:42:08.463Z",
+      "date": "2025-11-26"
     }
   ],
   "events": [
@@ -358,6 +641,175 @@
       "totalMeters": 131111,
       "date": "2025-11-24T04:05:49.566Z",
       "createdAt": "2025-11-24T04:05:49.566Z"
+    },
+    {
+      "id": "17641659733093t6odv6piyy",
+      "type": "goal-milestone",
+      "userId": "1763848753335",
+      "milestonePct": 0.25,
+      "prevRank": 4,
+      "newRank": 4,
+      "totalMeters": 25614,
+      "date": "2025-11-26T14:06:13.309Z",
+      "createdAt": "2025-11-26T14:06:13.309Z"
+    },
+    {
+      "id": "1764167408208inkp0z1ev6e",
+      "type": "goal-milestone",
+      "userId": "1763848753335",
+      "milestonePct": 0.5,
+      "prevRank": 4,
+      "newRank": 4,
+      "totalMeters": 50114,
+      "date": "2025-11-26T14:30:08.208Z",
+      "createdAt": "2025-11-26T14:30:08.208Z"
+    },
+    {
+      "id": "1764168077941y781qg0sf9",
+      "type": "top3-exit",
+      "userId": "1763951893697",
+      "prevRank": 3,
+      "newRank": null,
+      "totalMeters": 63000,
+      "date": "2025-11-26T14:41:17.941Z",
+      "createdAt": "2025-11-26T14:41:17.941Z"
+    },
+    {
+      "id": "1764168595696onzj0uc109c",
+      "type": "goal-milestone",
+      "userId": "1763848753335",
+      "milestonePct": 0.75,
+      "prevRank": 3,
+      "newRank": 3,
+      "totalMeters": 75114,
+      "date": "2025-11-26T14:49:55.696Z",
+      "createdAt": "2025-11-26T14:49:55.696Z"
+    },
+    {
+      "id": "17641686167200d1gkqny0yb",
+      "type": "goal-milestone",
+      "userId": "1763848753335",
+      "milestonePct": 1,
+      "prevRank": 3,
+      "newRank": 3,
+      "totalMeters": 115614,
+      "date": "2025-11-26T14:50:16.720Z",
+      "createdAt": "2025-11-26T14:50:16.720Z"
+    },
+    {
+      "id": "1764169144085k48v8ovmccl",
+      "type": "top3-change",
+      "userId": "1763939123527",
+      "prevRank": 2,
+      "newRank": 3,
+      "totalMeters": 121322,
+      "date": "2025-11-26T14:59:04.085Z",
+      "createdAt": "2025-11-26T14:59:04.085Z"
+    },
+    {
+      "id": "1764169144085tj2fbvu4dg",
+      "type": "top3-change",
+      "userId": "1763848753335",
+      "prevRank": 3,
+      "newRank": 2,
+      "totalMeters": 121614,
+      "date": "2025-11-26T14:59:04.085Z",
+      "createdAt": "2025-11-26T14:59:04.085Z"
+    },
+    {
+      "id": "1764169498891hp5q7p6uwdb",
+      "type": "top3-change",
+      "userId": "1763957105761",
+      "prevRank": 1,
+      "newRank": 2,
+      "totalMeters": 131111,
+      "date": "2025-11-26T15:04:58.891Z",
+      "createdAt": "2025-11-26T15:04:58.891Z"
+    },
+    {
+      "id": "17641694988911rj3rzetad3",
+      "type": "top3-change",
+      "userId": "1763848753335",
+      "prevRank": 2,
+      "newRank": 1,
+      "totalMeters": 1121614,
+      "date": "2025-11-26T15:04:58.891Z",
+      "createdAt": "2025-11-26T15:04:58.891Z"
+    },
+    {
+      "id": "1764171613298srflrjctaug",
+      "type": "goal-milestone",
+      "userId": "1764171570025",
+      "milestonePct": 0.1,
+      "prevRank": null,
+      "newRank": 6,
+      "totalMeters": 1000,
+      "date": "2025-11-26T15:40:13.298Z",
+      "createdAt": "2025-11-26T15:40:13.298Z"
+    },
+    {
+      "id": "1764171613298f8jw6lzmyt",
+      "type": "goal-milestone",
+      "userId": "1764171570025",
+      "milestonePct": 0.25,
+      "prevRank": null,
+      "newRank": 6,
+      "totalMeters": 1000,
+      "date": "2025-11-26T15:40:13.298Z",
+      "createdAt": "2025-11-26T15:40:13.298Z"
+    },
+    {
+      "id": "17641716132989fjwpn3dn1r",
+      "type": "goal-milestone",
+      "userId": "1764171570025",
+      "milestonePct": 0.5,
+      "prevRank": null,
+      "newRank": 6,
+      "totalMeters": 1000,
+      "date": "2025-11-26T15:40:13.298Z",
+      "createdAt": "2025-11-26T15:40:13.298Z"
+    },
+    {
+      "id": "17641716132986p0n3psx9fu",
+      "type": "goal-milestone",
+      "userId": "1764171570025",
+      "milestonePct": 0.75,
+      "prevRank": null,
+      "newRank": 6,
+      "totalMeters": 1000,
+      "date": "2025-11-26T15:40:13.298Z",
+      "createdAt": "2025-11-26T15:40:13.298Z"
+    },
+    {
+      "id": "176417161329844jzu48wlfp",
+      "type": "goal-milestone",
+      "userId": "1764171570025",
+      "milestonePct": 1,
+      "prevRank": null,
+      "newRank": 6,
+      "totalMeters": 1000,
+      "date": "2025-11-26T15:40:13.298Z",
+      "createdAt": "2025-11-26T15:40:13.298Z"
+    },
+    {
+      "id": "17641717284636o9f48dk246",
+      "type": "top3-change",
+      "userId": "1763957105761",
+      "prevRank": 2,
+      "newRank": 3,
+      "totalMeters": 131111,
+      "date": "2025-11-26T15:42:08.463Z",
+      "createdAt": "2025-11-26T15:42:08.463Z"
+    },
+    {
+      "id": "1764171728463qk9j9tjydej",
+      "type": "top3-exit",
+      "userId": "1763939123527",
+      "prevRank": 3,
+      "newRank": null,
+      "totalMeters": 121322,
+      "date": "2025-11-26T15:42:08.463Z",
+      "createdAt": "2025-11-26T15:42:08.463Z"
     }
   ]
 }
