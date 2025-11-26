@@ -1,18 +1,40 @@
-<header class="app-header">
-  <div class="brand">🏃 Activity Tracker</div>
-  <nav class="nav">
-    <% if (user) { %>
-      <a href="/dashboard" class="nav-link <%= activePage==='dashboard' ? 'active':'' %>" <%= activePage==='dashboard' ? 'aria-current="page"':'' %>>My Progress</a>
-      <a href="/entry/new" class="nav-link <%= activePage==='entry' ? 'active':'' %>" <%= activePage==='entry' ? 'aria-current="page"':'' %>>New Entry</a>
-      <a href="/leaderboard" class="nav-link <%= activePage==='leaderboard' ? 'active':'' %>" <%= activePage==='leaderboard' ? 'aria-current="page"':'' %>>Leaderboard</a>
-      <a href="/updates" class="nav-link <%= activePage==='updates' ? 'active':'' %>" <%= activePage==='updates' ? 'aria-current="page"':'' %>>Team Updates</a>
-      <a href="/settings" class="nav-link <%= activePage==='settings' ? 'active':'' %>" <%= activePage==='settings' ? 'aria-current="page"':'' %>>Settings</a>
-      <button id="toggleTheme" class="btn-icon" aria-label="Toggle theme">🌓</button>
-      <a href="/logout" class="nav-link danger">Logout</a>
+<% /* Gamified header using precomputed user.levelInfo */ %>
+<div class="app-header" style="--shell-primary:<%= user?.shellPrimary || '#000000' %>; --shell-secondary:<%= user?.shellSecondary || '#000000' %>; --oar-color:<%= user?.oarColor || '#000000' %>;">
+  <div class="logo-area">
+    <div class="shell-icon">
+      <%- include('shell_svg', { user }) %>
+    </div>
+    <div class="user-ident">
+      <span class="display-name"><%= (user && user.displayName) || (user && user.email? user.email.split('@')[0] : 'Guest') %></span>
+      <% if(user){ const ld = user.levelInfo || { level:1, progress:0 }; const baseNames=['beginner','novice','intermediate','experienced','competitive','champion','olympian']; const baseCount=baseNames.length; const rawLevel=(ld.level||1); const levelName = rawLevel<=baseCount? baseNames[rawLevel-1] : (baseNames[baseCount-1] + '+'.repeat(rawLevel-baseCount)); %>
+        <span class="level-text">Level: <span id="level-name"><%= levelName %></span></span>
+      <% } %>
+    </div>
+    <% if(user){ const ld2 = user.levelInfo || { level:1, progress:0 }; const filled = Math.floor(ld2.progress * 10); %>
+      <div class="level-bar" style="--bar-fill:<%= user.shellSecondary || '#000000' %>;" data-progress="<%= ld2.progress %>" data-level="<%= ld2.level %>" title="Progress: <%= (ld2.progress*100).toFixed(1) %>%" aria-label="Level progress <%= (ld2.progress*100).toFixed(1) %>%">
+        <span class="xp-tooltip"><%= (ld2.progress*100).toFixed(1) %>%</span>
+        <% for(let i=0;i<10;i++){ %>
+          <div class="segment <%= i < filled? 'filled':'' %>"><span class="seg-fill" style="width:<%= i < filled ? '100%' : (i===filled ? ((ld2.progress*10 - filled)*100).toFixed(1)+'%' : '0%') %>;"></span></div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+  <% const isOnboarding = typeof onboardingMode !== 'undefined' && onboardingMode; %>
+  <nav class="nav <%= isOnboarding? 'nav-locked':'' %>" aria-label="Primary" <%= isOnboarding? 'data-lock="1"':'' %>>
+    <a class="nav-link <%= activePage==='dashboard'? 'active':'' %>" href="/dashboard">Dashboard</a>
+    <a class="nav-link <%= activePage==='entry_new'? 'active':'' %>" href="/entry/new">New Entry</a>
+    <a class="nav-link <%= activePage==='leaderboard'? 'active':'' %>" href="/leaderboard">Leaderboard</a>
+    <a class="nav-link <%= activePage==='challenges'? 'active':'' %>" href="/challenges" id="challenges-link">Challenges <span id="challenge-dot" class="challenge-dot" style="display:none"></span></a>
+    <a class="nav-link <%= activePage==='updates'? 'active':'' %>" href="/updates">Updates</a>
+    <a class="nav-link <%= activePage==='settings'? 'active':'' %>" href="/settings">Settings</a>
+    <% if(user){ %>
+      <a class="nav-link danger" href="/logout">Logout</a>
+      <% /* Theme toggle removed: always dark theme */ %>
     <% } else { %>
-      <a href="/login" class="nav-link <%= activePage==='login' ? 'active':'' %>" <%= activePage==='login' ? 'aria-current="page"':'' %>>Login</a>
-      <a href="/register" class="nav-link <%= activePage==='register' ? 'active':'' %>" <%= activePage==='register' ? 'aria-current="page"':'' %>>Register</a>
-      <button id="toggleTheme" class="btn-icon" aria-label="Toggle theme">🌓</button>
+      <a class="nav-link" href="/login">Login</a>
+      <a class="nav-link" href="/register">Register</a>
+      <% /* Theme toggle removed for guest: always dark theme */ %>
     <% } %>
   </nav>
-</header>
+  <script src="/main.js" defer></script>
+</div>

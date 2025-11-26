@@ -7,9 +7,14 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="app">
-  <%- include('partials/header', { activePage:'onboarding', user:{ id: user.id, email:user.email } }) %>
+  <%- include('partials/header', { activePage:'onboarding', user:{ id: user.id, email:user.email }, onboardingMode:true }) %>
 <main class="app-main" style="grid-template-columns:1fr;">
   <section class="card form-card" style="max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:1.2rem;">
+    <div class="step-indicator">Step <%= stepIndex %> of <%= stepTotal %></div>
+    <div class="onboard-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= Math.round(((stepIndex-1)/stepTotal)*100) %>">
+      <div class="onboard-progress-fill" style="width:<%= ((stepIndex-1)/stepTotal*100).toFixed(1) %>%"></div>
+    </div>
+    <% const finalStep = (stepIndex === stepTotal); %>
     <% if (step==='display') { %>
       <h1 style="font-size:1.3rem;">Set Your Display Name</h1>
       <p class="subtle" style="font-size:.7rem;">This name appears on the leaderboard.</p>
@@ -17,17 +22,19 @@
       <h1 style="font-size:1.3rem;">Set Your Goal</h1>
       <p class="subtle" style="font-size:.7rem;">How many meters are you planning to get by the end of this challenge?</p>
     <% } else if (step==='colors') { %>
-      <div class="subtle" style="font-size:.65rem;">Final Step</div>
+      <% if(finalStep){ %><div class="subtle" style="font-size:.65rem;">Final Step</div><% } %>
       <h1 style="font-size:1.3rem;">Customize Shell</h1>
       <p class="subtle" style="font-size:.7rem;">Pick colors for your shell and oar.</p>
+    <% } else if (step==='token') { %>
+      <% if(finalStep){ %><div class="subtle" style="font-size:.65rem;">Final Step</div><% } %>
     <% } %>
     <% if (step==='display') { %>
       <form method="post" action="/onboarding/display" class="form-grid">
         <div class="field">
           <label for="displayName">Display Name</label>
-          <input id="displayName" name="displayName" type="text" maxlength="40" value="<%= user.displayName || '' %>" required>
+          <input id="displayName" name="displayName" type="text" maxlength="40" value="<%= (user.displayName || (user.email? user.email.split('@')[0] : '')) %>" required>
         </div>
-        <div class="actions"><button class="btn" type="submit">Continue</button></div>
+        <div class="actions"><button class="btn" type="submit"><%= finalStep ? 'Finish' : 'Continue' %></button></div>
       </form>
     <% } else if (step==='goal') { %>
       <form method="post" action="/onboarding/goal" class="form-grid">
@@ -35,7 +42,7 @@
           <label for="goalMeters">Goal (meters)</label>
           <input id="goalMeters" name="goalMeters" type="number" min="1" step="1" required placeholder="e.g. 50000">
         </div>
-        <div class="actions"><button class="btn" type="submit">Continue</button></div>
+        <div class="actions"><button class="btn" type="submit"><%= finalStep ? 'Finish' : 'Continue' %></button></div>
       </form>
     <% } else if (step==='colors') { %>
       <form method="post" action="/onboarding/colors" class="form-grid">
@@ -56,12 +63,28 @@
         <div class="field"><label for="shellPrimary">Primary</label><input id="shellPrimary" name="shellPrimary" type="color" value="<%= initPrimary || '#2E7BCB' %>"></div>
         <div class="field"><label for="shellSecondary">Secondary</label><input id="shellSecondary" name="shellSecondary" type="color" value="<%= initSecondary || '#FFD447' %>"></div>
         <div class="field"><label for="oarColor">Oar</label><input id="oarColor" name="oarColor" type="color" value="<%= initOar || '#FF4F4F' %>"></div>
-        <div class="actions"><button class="btn" type="submit">Finish</button></div>
+        <div class="actions"><button class="btn" type="submit"><%= finalStep ? 'Finish' : 'Continue' %></button></div>
+      </form>
+    <% } else if (step==='token') { %>
+      <h1 style="font-size:1.3rem;">Concept2 API Token</h1>
+      <p class="subtle" style="font-size:.7rem;">Optional: Add your Concept2 Logbook token to import workouts automatically. You can skip for now and add later in Settings.</p>
+      <form method="post" action="/onboarding/token" class="form-grid">
+        <div class="field">
+          <label for="logbookToken">Logbook Token</label>
+          <input id="logbookToken" name="logbookToken" type="text" maxlength="120" placeholder="Paste token here (optional)">
+        </div>
+        <% if (tokenError) { %><div class="alert error" style="margin-top:-.3rem;"><%= tokenError %></div><% } %>
+        <div class="actions" style="display:flex; gap:.75rem;">
+          <button class="btn" type="submit"><%= finalStep ? 'Finish' : 'Continue' %></button>
+          <a href="/dashboard" class="btn" style="background:var(--color-text-light);" onclick="event.preventDefault(); fetch('/onboarding/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'logbookToken='}).then(()=>{ window.location='/dashboard'; });">Skip</a>
+        </div>
       </form>
     <% } %>
   </section>
 </main>
 <script>
+  // Force dark theme visually
+  try { document.documentElement.dataset.theme='dark'; } catch{}
   function updatePreview(){ const svg=document.getElementById('shellSvg'); if(!svg) return; const p=document.getElementById('shellPrimary'); const s=document.getElementById('shellSecondary'); const o=document.getElementById('oarColor'); svg.querySelectorAll('.primary').forEach(el=>el.setAttribute('fill',p?p.value:'#2E7BCB')); svg.querySelectorAll('.secondary').forEach(el=>el.setAttribute('fill',s?s.value:'#FFD447')); svg.querySelectorAll('.oar').forEach(el=>el.setAttribute('fill',o?o.value:'#FF4F4F')); }
   ['shellPrimary','shellSecondary','oarColor'].forEach(id=>{ const el=document.getElementById(id); el && el.addEventListener('input',updatePreview); });
   updatePreview();
