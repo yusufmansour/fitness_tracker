@@ -161,7 +161,7 @@ app.use(async (req,res,next)=>{ try {
     await loadDb();
     const user=db.users.find(u=>u.id===req.session.userId);
     // Exempt OAuth callback path so code parameter is not lost
-    const exemptPaths = ['/onboarding','/logout','/entry/new','/auth/concept2/callback'];
+    const exemptPaths = ['/onboarding','/logout','/entry/new','/auth/concept2/callback','/webhook'];
     if(user && !user.onboarded && !exemptPaths.some(p=> req.path.startsWith(p))){
       return res.redirect('/onboarding');
     }
