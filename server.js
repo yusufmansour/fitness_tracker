@@ -665,7 +665,7 @@ async function pollUserConcept2(user){
   if(st.lastAttempt && now - st.lastAttempt < st.backoffMin*60*1000) return;
   st.lastAttempt = now; syncState.set(user.id, st);
   try {
-    // Reuse existing fetch with userId discovery, then re-fetch workouts endpoint with conditional headers
+    // Reuse existing fetch with userId discovery, then try workouts/results endpoints with conditional headers
     const base = (process.env.LOGBOOK_API_BASE || 'https://log.concept2.com') + '/api';
     const headers = { 'Accept':'application/json', 'User-Agent':'ActivityTracker/1.0', 'Authorization':'Bearer ' + user.logbookToken };
     if(st.etag) headers['If-None-Match'] = st.etag;
@@ -678,30 +678,54 @@ async function pollUserConcept2(user){
       if(userId){ user.logbookUserId = userId; await saveDb(); }
     }
     if(!userId) return;
-    const url = `${base}/users/${userId}/workouts.json?limit=50`;
-    const res = await fetch(url, { headers });
-    if(res.status === 304){ st.backoffMin = Math.min(st.backoffMin + 5, 60); return; }
-    const etag = res.headers.get('etag') || res.headers.get('ETag');
-    const lastMod = res.headers.get('last-modified') || res.headers.get('Last-Modified');
-    const text = await res.text(); let json=null; try{ json=text? JSON.parse(text): null; }catch{}
-    const arr = Array.isArray(json)? json : Array.isArray(json?.data)? json.data : Array.isArray(json?.workouts)? json.workouts : [];
+
+    // Try a list of candidate endpoints for recent activities
+    const endpoints = [
+      `${base}/users/${userId}/workouts.json?limit=50`,
+      `${base}/users/${userId}/results.json?limit=50`,
+      `${base}/users/${userId}/results?format=json&limit=50`
+    ];
+    let etag = null, lastMod = null, arr = [], scanned = 0, status = 0;
+    for(const url of endpoints){
+      const res = await fetch(url, { headers });
+      status = res.status;
+      if(res.status === 304){ etag = res.headers.get('etag') || res.headers.get('ETag'); lastMod = res.headers.get('last-modified') || res.headers.get('Last-Modified'); break; }
+      const text = await res.text(); let json=null; try{ json=text? JSON.parse(text): null; }catch{}
+      const candidate = Array.isArray(json)? json : Array.isArray(json?.data)? json.data : Array.isArray(json?.workouts)? json.workouts : Array.isArray(json?.results)? json.results : [];
+      scanned = candidate.length;
+      etag = res.headers.get('etag') || res.headers.get('ETag');
+      lastMod = res.headers.get('last-modified') || res.headers.get('Last-Modified');
+      if(candidate.length){ arr = candidate; break; }
+    }
+
+    if(status === 304){ st.backoffMin = Math.min(st.backoffMin + 5, 60); return; }
+
     const prevTotals = computeTotals();
-    let added=0; let scanned=arr.length;
+    let added=0; let xpGained=0;
+    const existingRemote = new Set(db.entries.filter(e => e.origin==='concept2' && e.remoteId).map(e=>e.remoteId));
     for(const w of arr){
       const remoteId = String(w.id || w.workoutId || w.logId || w.resultId || '');
-      const meters = Number(w.distance || w.meters || w.total_distance || w.workDistance || 0);
+      const metersRaw = w.distance || w.meters || w.total_distance || w.workDistance || 0;
+      const meters = typeof metersRaw === 'string' ? Number(metersRaw.replace(/[^0-9]/g,'')) : Number(metersRaw);
       const dateRaw = w.date || w.workoutDate || w.created_at || w.datetime || w.timestamp || new Date().toISOString();
       const date = String(dateRaw).substring(0,10);
       if(!remoteId || !meters) continue;
       if(st.lastIds.has(remoteId)) continue;
-      const existingRemote = new Set(db.entries.filter(e => e.origin==='concept2' && e.remoteId).map(e=>e.remoteId));
       if(existingRemote.has(remoteId)) { st.lastIds.add(remoteId); continue; }
       db.entries.push({ id: Date.now().toString()+Math.random().toString(36).slice(2), userId:user.id, date, value:meters, origin:'concept2', remoteId });
       added++;
+      xpGained += awardBaselineXp(user, meters);
       st.lastIds.add(remoteId);
     }
-    if(added){ recordLeaderboardEvents(prevTotals); await saveDb(); user.logbookLastSync = { when:new Date().toISOString(), imported:added, scanned, xpGained:0 }; await saveDb(); st.backoffMin = 5; st.lastSuccess = Date.now(); broadcastEvent({ type:'workouts-imported', userId:user.id, imported:added, scanned }); }
-    else { st.backoffMin = Math.min(st.backoffMin + 5, 60); }
+    if(added){
+      recordLeaderboardEvents(prevTotals); await saveDb();
+      user.logbookLastSync = { when:new Date().toISOString(), imported:added, scanned, xpGained };
+      await saveDb();
+      st.backoffMin = 5; st.lastSuccess = Date.now();
+      broadcastEvent({ type:'workouts-imported', userId:user.id, imported:added, scanned });
+    } else {
+      st.backoffMin = Math.min(st.backoffMin + 5, 60);
+    }
     st.etag = etag || st.etag; st.lastModified = lastMod || st.lastModified; syncState.set(user.id, st);
   } catch(e){ st.backoffMin = Math.min(st.backoffMin*2, 120); syncState.set(user.id, st); }
 }
@@ -729,14 +753,15 @@ app.post('/webhook/concept2', async (req,res)=>{
       const r = payload.result || {};
       const userIdRemote = r.user_id || r.userId;
       const remoteId = String(r.id || r.result_id || r.workoutId || '');
-      const meters = Number(r.distance || r.meters || 0);
+      const metersRaw = r.distance || r.meters || 0;
+      const meters = typeof metersRaw === 'string' ? Number(String(metersRaw).replace(/[^0-9]/g,'')) : Number(metersRaw);
       const date = String(r.date || '').substring(0,10) || new Date().toISOString().substring(0,10);
       const user = db.users.find(u=> (u.logbookUserId && String(u.logbookUserId)===String(userIdRemote)) || (u.id===userIdRemote));
       if(!user){ return res.status(200).json({ ok:true, ignored:true }); }
       // Update or insert entry
       const existingIdx = db.entries.findIndex(e=> e.origin==='concept2' && e.remoteId===remoteId);
       if(existingIdx>-1){ db.entries[existingIdx].value = meters; db.entries[existingIdx].date = date; }
-      else { db.entries.push({ id: Date.now().toString()+Math.random().toString(36).slice(2), userId:user.id, date, value:meters, origin:'concept2', remoteId }); }
+      else { db.entries.push({ id: Date.now().toString()+Math.random().toString(36).slice(2), userId:user.id, date, value:meters, origin:'concept2', remoteId }); awardBaselineXp(user, meters); }
       const prevTotals = computeTotals();
       recordLeaderboardEvents(prevTotals); await saveDb();
       user.logbookLastSync = { when:new Date().toISOString(), imported: existingIdx>-1? 0: 1, scanned: 1, xpGained: 0 }; await saveDb();
