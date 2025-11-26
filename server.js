@@ -7,6 +7,8 @@ const fs = require('fs').promises;
 const app = express();
 const dbFile = path.join(__dirname, 'db.json');
 let db = { users: [], entries: [], events: [] };
+// In-memory sync state per user (non-persistent)
+const syncState = new Map(); // userId -> { etag, lastModified, lastIds:Set<string>, backoffMin:number, lastAttempt:number, lastSuccess:number, userId:number }
 
 async function loadDb() {
   try {
@@ -198,6 +200,45 @@ app.post('/login', async (req, res) => {
 
 app.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/'));
+});
+
+// --- Concept2 OAuth callback ---
+function getBaseUrl(req){ return (process.env.PUBLIC_BASE_URL) || (req.protocol + '://' + req.get('host')); }
+app.get('/auth/concept2/callback', requireAuth, async (req,res)=>{
+  try {
+    const code = req.query.code;
+    if(!code) return res.status(400).send('Missing code');
+    const clientId = process.env.CONCEPT2_CLIENT_ID;
+    const clientSecret = process.env.CONCEPT2_CLIENT_SECRET;
+    if(!clientId || !clientSecret){ return res.status(500).send('OAuth not configured'); }
+    const redirectUri = getBaseUrl(req) + '/auth/concept2/callback';
+    const tokenUrl = (process.env.LOGBOOK_OAUTH_TOKEN_URL || 'https://log.concept2.com/oauth/token');
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: redirectUri,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    const tRes = await fetch(tokenUrl, { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded', 'Accept':'application/json' }, body });
+    const tText = await tRes.text();
+    let tJson = null; try{ tJson = tText? JSON.parse(tText): null; } catch{}
+    if(!tRes.ok || !tJson?.access_token){
+      console.error('Token exchange failed', tRes.status, tText);
+      return res.status(502).send('Token exchange failed');
+    }
+    await loadDb();
+    const user = db.users.find(u=>u.id===req.session.userId);
+    if(!user) return res.redirect('/login');
+    user.logbookToken = tJson.access_token;
+    // Fetch profile to capture Concept2 user_id for webhook mapping
+    try {
+      const profRes = await fetch((process.env.LOGBOOK_API_BASE || 'https://log.concept2.com') + '/api/users/me.json', { headers:{ 'Authorization':'Bearer '+user.logbookToken, 'Accept':'application/json' } });
+      if(profRes.ok){ const pTxt = await profRes.text(); const pJson = pTxt? JSON.parse(pTxt): null; const c2id = pJson?.id || pJson?.user_id || pJson?.userId; if(c2id) user.logbookUserId = c2id; }
+    } catch{}
+    await saveDb();
+    return res.redirect('/settings?tab=token');
+  } catch(e){ console.error('OAuth callback error', e); return res.status(500).send('OAuth error'); }
 });
 
 app.get('/dashboard', requireAuth, async (req, res) => {
@@ -412,6 +453,7 @@ app.get('/sync/logbook', requireAuth, async (req,res)=>{
   const user = db.users.find(u => u.id === req.session.userId);
   if(!user || !user.logbookToken) return res.status(400).json({ ok:false, error:'No token set' });
   const { profile, rawProfile, workouts, attempts, errors } = await fetchLogbookWorkouts(user.logbookToken);
+  if(profile && !user.logbookUserId){ const uid = profile.id || profile.user_id || profile.userId; if(uid){ user.logbookUserId = uid; await saveDb(); } }
   const existingRemote = new Set(db.entries.filter(e => e.origin==='concept2' && e.remoteId).map(e=>e.remoteId));
   let added = 0;
   let xpGained=0;
@@ -422,6 +464,16 @@ app.get('/sync/logbook', requireAuth, async (req,res)=>{
     user.logbookLastSync = { when:new Date().toISOString(), imported:added, scanned:workouts.length, xpGained }; await saveDb();
   }
   res.json({ ok:true, preview:dry, imported:added, candidate:workouts.length, profileFound:!!profile, profileKeys: profile? Object.keys(profile):[], attempts, errors });
+});
+// Fast-sync endpoint: trigger an immediate poll for current user
+app.get('/api/sync/logbook/now', requireAuth, async (req,res)=>{
+  try {
+    await loadDb();
+    const user = db.users.find(u => u.id === req.session.userId);
+    if(!user || !user.logbookToken) return res.status(400).json({ ok:false, error:'No token set' });
+    await pollUserConcept2(user);
+    return res.json({ ok:true });
+  } catch(e){ return res.status(500).json({ ok:false }); }
 });
 app.get('/api/debug/logbook/profile', requireAuth, async (req,res)=>{
   await loadDb();
@@ -580,3 +632,114 @@ function startServer(port, maxPort){
 }
 const BASE_PORT = parseInt(process.env.PORT,10) || 3000;
 startServer(BASE_PORT, BASE_PORT + 10);
+
+// ---- Lightweight Poller + SSE ----
+const sseClients = new Set();
+function broadcastEvent(ev){ const payload = `data: ${JSON.stringify(ev)}\n\n`; for(const res of sseClients){ try { res.write(payload); } catch{} } }
+
+app.get('/api/updates/stream', requireAuth, (req,res)=>{
+  res.setHeader('Content-Type','text/event-stream');
+  res.setHeader('Cache-Control','no-cache');
+  res.setHeader('Connection','keep-alive');
+  res.flushHeaders && res.flushHeaders();
+  res.write(`data: {"ok":true}\n\n`);
+  sseClients.add(res);
+  req.on('close', ()=> sseClients.delete(res));
+});
+
+async function pollUserConcept2(user){
+  if(!user || !user.logbookToken) return;
+  const now = Date.now();
+  const st = syncState.get(user.id) || { etag:null, lastModified:null, lastIds:new Set(), backoffMin:5, lastAttempt:0, lastSuccess:0 };
+  if(st.lastAttempt && now - st.lastAttempt < st.backoffMin*60*1000) return;
+  st.lastAttempt = now; syncState.set(user.id, st);
+  try {
+    // Reuse existing fetch with userId discovery, then re-fetch workouts endpoint with conditional headers
+    const base = (process.env.LOGBOOK_API_BASE || 'https://log.concept2.com') + '/api';
+    const headers = { 'Accept':'application/json', 'User-Agent':'ActivityTracker/1.0', 'Authorization':'Bearer ' + user.logbookToken };
+    if(st.etag) headers['If-None-Match'] = st.etag;
+    if(st.lastModified) headers['If-Modified-Since'] = st.lastModified;
+    // Discover user id once
+    let userId = user.logbookUserId || null;
+    if(!userId){
+      const res = await fetch(base + '/users/me.json', { headers });
+      if(res.ok){ const txt = await res.text(); try { const js = JSON.parse(txt); userId = js.id || js.user_id || js.userId; } catch{} }
+      if(userId){ user.logbookUserId = userId; await saveDb(); }
+    }
+    if(!userId) return;
+    const url = `${base}/users/${userId}/workouts.json?limit=50`;
+    const res = await fetch(url, { headers });
+    if(res.status === 304){ st.backoffMin = Math.min(st.backoffMin + 5, 60); return; }
+    const etag = res.headers.get('etag') || res.headers.get('ETag');
+    const lastMod = res.headers.get('last-modified') || res.headers.get('Last-Modified');
+    const text = await res.text(); let json=null; try{ json=text? JSON.parse(text): null; }catch{}
+    const arr = Array.isArray(json)? json : Array.isArray(json?.data)? json.data : Array.isArray(json?.workouts)? json.workouts : [];
+    const prevTotals = computeTotals();
+    let added=0; let scanned=arr.length;
+    for(const w of arr){
+      const remoteId = String(w.id || w.workoutId || w.logId || w.resultId || '');
+      const meters = Number(w.distance || w.meters || w.total_distance || w.workDistance || 0);
+      const dateRaw = w.date || w.workoutDate || w.created_at || w.datetime || w.timestamp || new Date().toISOString();
+      const date = String(dateRaw).substring(0,10);
+      if(!remoteId || !meters) continue;
+      if(st.lastIds.has(remoteId)) continue;
+      const existingRemote = new Set(db.entries.filter(e => e.origin==='concept2' && e.remoteId).map(e=>e.remoteId));
+      if(existingRemote.has(remoteId)) { st.lastIds.add(remoteId); continue; }
+      db.entries.push({ id: Date.now().toString()+Math.random().toString(36).slice(2), userId:user.id, date, value:meters, origin:'concept2', remoteId });
+      added++;
+      st.lastIds.add(remoteId);
+    }
+    if(added){ recordLeaderboardEvents(prevTotals); await saveDb(); user.logbookLastSync = { when:new Date().toISOString(), imported:added, scanned, xpGained:0 }; await saveDb(); st.backoffMin = 5; st.lastSuccess = Date.now(); broadcastEvent({ type:'workouts-imported', userId:user.id, imported:added, scanned }); }
+    else { st.backoffMin = Math.min(st.backoffMin + 5, 60); }
+    st.etag = etag || st.etag; st.lastModified = lastMod || st.lastModified; syncState.set(user.id, st);
+  } catch(e){ st.backoffMin = Math.min(st.backoffMin*2, 120); syncState.set(user.id, st); }
+}
+
+function startPoller(){
+  setInterval(async ()=>{
+    try { await loadDb(); for(const u of db.users){ if(u.logbookToken) await pollUserConcept2(u); } } catch{}
+  }, 120000); // 2 minutes tick; backoff per-user controls actual rate
+}
+startPoller();
+
+// ---- Concept2 Webhook Receiver ----
+// Configure your webhook URL in the Concept2 developer portal to point to:
+// POST /webhook/concept2
+// Optionally set CONCEPT2_WEBHOOK_SECRET to a shared token for simple auth.
+app.post('/webhook/concept2', async (req,res)=>{
+  try {
+    const secret = process.env.CONCEPT2_WEBHOOK_SECRET || null;
+    const got = (req.headers['x-concept2-secret'] || req.query.secret || req.body?.secret || null);
+    if(secret && got !== secret) return res.status(401).json({ ok:false, error:'unauthorized' });
+    const payload = req.body && req.body.data ? req.body.data : req.body;
+    const type = payload?.type;
+    await loadDb();
+    if(type === 'result-added' || type === 'result-updated'){
+      const r = payload.result || {};
+      const userIdRemote = r.user_id || r.userId;
+      const remoteId = String(r.id || r.result_id || r.workoutId || '');
+      const meters = Number(r.distance || r.meters || 0);
+      const date = String(r.date || '').substring(0,10) || new Date().toISOString().substring(0,10);
+      const user = db.users.find(u=> (u.logbookUserId && String(u.logbookUserId)===String(userIdRemote)) || (u.id===userIdRemote));
+      if(!user){ return res.status(200).json({ ok:true, ignored:true }); }
+      // Update or insert entry
+      const existingIdx = db.entries.findIndex(e=> e.origin==='concept2' && e.remoteId===remoteId);
+      if(existingIdx>-1){ db.entries[existingIdx].value = meters; db.entries[existingIdx].date = date; }
+      else { db.entries.push({ id: Date.now().toString()+Math.random().toString(36).slice(2), userId:user.id, date, value:meters, origin:'concept2', remoteId }); }
+      const prevTotals = computeTotals();
+      recordLeaderboardEvents(prevTotals); await saveDb();
+      user.logbookLastSync = { when:new Date().toISOString(), imported: existingIdx>-1? 0: 1, scanned: 1, xpGained: 0 }; await saveDb();
+      broadcastEvent({ type:'workout-webhook', action:type, userId:user.id, remoteId, meters });
+      return res.status(200).json({ ok:true });
+    } else if(type === 'result-deleted'){
+      const remoteId = String(payload.result_id || payload.resultId || '');
+      const before = db.entries.length;
+      db.entries = db.entries.filter(e=> !(e.origin==='concept2' && e.remoteId===remoteId));
+      await saveDb();
+      broadcastEvent({ type:'workout-webhook', action:type, remoteId });
+      return res.status(200).json({ ok:true, removed: before - db.entries.length });
+    } else {
+      return res.status(400).json({ ok:false, error:'unknown type' });
+    }
+  } catch(e){ console.error('webhook error', e); return res.status(500).json({ ok:false }); }
+});
