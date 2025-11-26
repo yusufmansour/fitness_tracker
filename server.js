@@ -156,7 +156,18 @@ app.post('/onboarding/reset', requireAuth, async (req,res)=>{
 });
 
 // Global onboarding redirect (placed after routes so /onboarding exists)
-app.use(async (req,res,next)=>{ try { if(req.session && req.session.userId){ await loadDb(); const user=db.users.find(u=>u.id===req.session.userId); if(user && !user.onboarded && !req.path.startsWith('/onboarding') && !req.path.startsWith('/logout') && !req.path.startsWith('/entry/new')) return res.redirect('/onboarding'); } next(); } catch(e){ next(); } });
+app.use(async (req,res,next)=>{ try {
+  if(req.session && req.session.userId){
+    await loadDb();
+    const user=db.users.find(u=>u.id===req.session.userId);
+    // Exempt OAuth callback path so code parameter is not lost
+    const exemptPaths = ['/onboarding','/logout','/entry/new','/auth/concept2/callback'];
+    if(user && !user.onboarded && !exemptPaths.some(p=> req.path.startsWith(p))){
+      return res.redirect('/onboarding');
+    }
+  }
+  next();
+} catch(e){ next(); } });
 
 app.get('/', async (req, res) => {
   await loadDb();
