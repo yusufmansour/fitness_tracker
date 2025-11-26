@@ -647,6 +647,9 @@ startServer(BASE_PORT, BASE_PORT + 10);
 // ---- Lightweight Poller + SSE ----
 const sseClients = new Set();
 function broadcastEvent(ev){ const payload = `data: ${JSON.stringify(ev)}\n\n`; for(const res of sseClients){ try { res.write(payload); } catch{} } }
+// Lightweight in-memory webhook debug buffer
+const webhookDebug = [];
+function pushWebhookDebug(entry){ try { webhookDebug.push({ ...entry, ts:new Date().toISOString() }); if(webhookDebug.length>50) webhookDebug.shift(); } catch{} }
 
 app.get('/api/updates/stream', requireAuth, (req,res)=>{
   res.setHeader('Content-Type','text/event-stream');
@@ -745,19 +748,28 @@ app.post('/webhook/concept2', async (req,res)=>{
   try {
     const secret = process.env.CONCEPT2_WEBHOOK_SECRET || null;
     const got = (req.headers['x-concept2-secret'] || req.query.secret || req.body?.secret || null);
-    if(secret && got !== secret) return res.status(401).json({ ok:false, error:'unauthorized' });
-    const payload = req.body && req.body.data ? req.body.data : req.body;
-    const type = payload?.type;
+    const authOk = !secret || got === secret;
+    if(secret && !authOk){
+      pushWebhookDebug({ path:'/webhook/concept2', note:'secret-mismatch', hasSecretHeader: !!req.headers['x-concept2-secret'] });
+      return res.status(401).json({ ok:false, error:'unauthorized' });
+    }
+    // Try to normalize payloads with variants: {type, result}, {event, data}, {action, workout}
+    const raw = req.body || {};
+    const envelopeType = raw.type || raw.event || raw.action || null;
+    const inner = raw.result || raw.data || raw.workout || raw.item || raw.payload || raw;
+    const payload = inner && inner.data ? inner.data : inner;
+    const type = (payload && payload.type) || envelopeType;
+    pushWebhookDebug({ path:'/webhook/concept2', gotType:type || 'unknown', keys:Object.keys(raw||{}), auth: secret? (authOk?'ok':'mismatch'):'none' });
     await loadDb();
-    if(type === 'result-added' || type === 'result-updated'){
-      const r = payload.result || {};
-      const userIdRemote = r.user_id || r.userId;
-      const remoteId = String(r.id || r.result_id || r.workoutId || '');
-      const metersRaw = r.distance || r.meters || 0;
+    if(type === 'result-added' || type === 'result-updated' || type === 'workout-added' || type === 'workout-updated'){
+      const r = payload.result || payload || {};
+      const userIdRemote = r.user_id || r.userId || raw.user_id || raw.userId;
+      const remoteId = String(r.id || r.result_id || r.workoutId || r.logId || '');
+      const metersRaw = r.distance || r.total_distance || r.meters || r.workDistance || 0;
       const meters = typeof metersRaw === 'string' ? Number(String(metersRaw).replace(/[^0-9]/g,'')) : Number(metersRaw);
-      const date = String(r.date || '').substring(0,10) || new Date().toISOString().substring(0,10);
+      const date = String(r.date || r.workoutDate || r.datetime || r.timestamp || '').substring(0,10) || new Date().toISOString().substring(0,10);
       const user = db.users.find(u=> (u.logbookUserId && String(u.logbookUserId)===String(userIdRemote)) || (u.id===userIdRemote));
-      if(!user){ return res.status(200).json({ ok:true, ignored:true }); }
+      if(!user){ pushWebhookDebug({ note:'user-not-mapped', userIdRemote, remoteId }); return res.status(200).json({ ok:true, ignored:true, reason:'user-not-mapped' }); }
       // Update or insert entry
       const existingIdx = db.entries.findIndex(e=> e.origin==='concept2' && e.remoteId===remoteId);
       if(existingIdx>-1){ db.entries[existingIdx].value = meters; db.entries[existingIdx].date = date; }
@@ -766,16 +778,24 @@ app.post('/webhook/concept2', async (req,res)=>{
       recordLeaderboardEvents(prevTotals); await saveDb();
       user.logbookLastSync = { when:new Date().toISOString(), imported: existingIdx>-1? 0: 1, scanned: 1, xpGained: 0 }; await saveDb();
       broadcastEvent({ type:'workout-webhook', action:type, userId:user.id, remoteId, meters });
+      pushWebhookDebug({ note:'processed', action:type, userId:user.id, remoteId, meters });
       return res.status(200).json({ ok:true });
-    } else if(type === 'result-deleted'){
-      const remoteId = String(payload.result_id || payload.resultId || '');
+    } else if(type === 'result-deleted' || type === 'workout-deleted'){
+      const remoteId = String(payload.result_id || payload.resultId || payload.id || '');
       const before = db.entries.length;
       db.entries = db.entries.filter(e=> !(e.origin==='concept2' && e.remoteId===remoteId));
       await saveDb();
       broadcastEvent({ type:'workout-webhook', action:type, remoteId });
+      pushWebhookDebug({ note:'deleted', action:type, remoteId });
       return res.status(200).json({ ok:true, removed: before - db.entries.length });
     } else {
-      return res.status(400).json({ ok:false, error:'unknown type' });
+      pushWebhookDebug({ note:'unknown-type', type });
+      // Return 200 so provider doesn't aggressively retry unknown variants
+      return res.status(200).json({ ok:true, ignored:true, reason:'unknown-type', type });
     }
   } catch(e){ console.error('webhook error', e); return res.status(500).json({ ok:false }); }
 });
+
+// Small debug endpoints to verify webhook reachability and recent events
+app.get('/webhook/_health', (req,res)=> res.json({ ok:true }));
+app.get('/webhook/concept2/debug', requireAuth, (req,res)=> res.json({ ok:true, events:webhookDebug.slice(-20).reverse() }));
