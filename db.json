@@ -256,6 +256,23 @@
       ],
       "goalMeters": 1,
       "logbookToken": "wVQ5j1e84za3Ezmrz5JR2CNa3dHbi7GfOZ"
+    },
+    {
+      "id": "1764173091824",
+      "email": "g@h.com",
+      "password": "$2a$10$1.Pfaa26MM/mZlt6wCiiYuLoFXxO8Zcb7EuCpgGmI.K1SqYZaZGlK",
+      "displayName": "g",
+      "displayConfirmed": true,
+      "shellConfirmed": true,
+      "shellPrimary": "#ff0000",
+      "shellSecondary": "#000000",
+      "oarColor": "#000000",
+      "onboarded": true,
+      "xp": 0,
+      "meterBank": 0,
+      "claimedChallenges": [],
+      "goalMeters": 12312321312,
+      "logbookToken": "wVQ5j1e84za3Ezmrz5JR2CNa3dHbi7GfOZfkb33a"
     }
   ],
   "entries": [
