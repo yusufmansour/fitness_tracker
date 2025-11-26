@@ -38,6 +38,39 @@ console.log('fitness_tracker main.js loaded');
     moreBtn && moreBtn.addEventListener('click', load); load();
   })();
 
+  // Live updates via SSE: listen for server broadcast of imports
+  (function(){
+    try {
+      const es = new EventSource('/api/updates/stream');
+      es.onmessage = function(ev){
+        try { const data = JSON.parse(ev.data||'{}');
+          if(data && data.type==='workouts-imported'){
+            showToast(`Imported ${data.imported} new workouts`, true);
+            updateChallengeDot();
+            pollAlerts();
+            refreshXp();
+          }
+          else if(data && data.type==='workout-webhook'){
+            const act = data.action || 'update';
+            showToast(`Workout ${act.replace('result-','')} via webhook`, true);
+            updateChallengeDot(); pollAlerts(); refreshXp();
+          }
+        } catch{}
+      };
+      es.onerror = function(){ /* ignore; browser will retry */ };
+    } catch{}
+  })();
+
+  // Trigger a fast sync once when user opens the page (throttled)
+  (function(){
+    try {
+      const key='lastFastSync'; const now=Date.now(); const prev=parseInt(localStorage.getItem(key)||'0',10);
+      if(!prev || (now - prev) > 5*60*1000){ // 5 minutes throttle
+        fetch('/api/sync/logbook/now').then(()=>{ localStorage.setItem(key, String(now)); }).catch(()=>{});
+      }
+    } catch{}
+  })();
+
   // Toast helper
   function ensureToast(){ let t=document.getElementById('globalToast'); if(!t){ t=document.createElement('div'); t.id='globalToast'; t.className='toast'; document.body.appendChild(t); } return t; }
   function showToast(msg, ok){ const t=ensureToast(); t.textContent=msg; t.dataset.state= ok? 'ok':'err'; t.classList.add('visible'); setTimeout(()=> t.classList.remove('visible'), 2200); }
