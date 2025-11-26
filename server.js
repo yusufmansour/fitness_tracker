@@ -202,6 +202,45 @@ app.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/'));
 });
 
+// --- Concept2 OAuth callback ---
+function getBaseUrl(req){ return (process.env.PUBLIC_BASE_URL) || (req.protocol + '://' + req.get('host')); }
+app.get('/auth/concept2/callback', requireAuth, async (req,res)=>{
+  try {
+    const code = req.query.code;
+    if(!code) return res.status(400).send('Missing code');
+    const clientId = process.env.CONCEPT2_CLIENT_ID;
+    const clientSecret = process.env.CONCEPT2_CLIENT_SECRET;
+    if(!clientId || !clientSecret){ return res.status(500).send('OAuth not configured'); }
+    const redirectUri = getBaseUrl(req) + '/auth/concept2/callback';
+    const tokenUrl = (process.env.LOGBOOK_OAUTH_TOKEN_URL || 'https://log.concept2.com/oauth/token');
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: redirectUri,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    const tRes = await fetch(tokenUrl, { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded', 'Accept':'application/json' }, body });
+    const tText = await tRes.text();
+    let tJson = null; try{ tJson = tText? JSON.parse(tText): null; } catch{}
+    if(!tRes.ok || !tJson?.access_token){
+      console.error('Token exchange failed', tRes.status, tText);
+      return res.status(502).send('Token exchange failed');
+    }
+    await loadDb();
+    const user = db.users.find(u=>u.id===req.session.userId);
+    if(!user) return res.redirect('/login');
+    user.logbookToken = tJson.access_token;
+    // Fetch profile to capture Concept2 user_id for webhook mapping
+    try {
+      const profRes = await fetch((process.env.LOGBOOK_API_BASE || 'https://log.concept2.com') + '/api/users/me.json', { headers:{ 'Authorization':'Bearer '+user.logbookToken, 'Accept':'application/json' } });
+      if(profRes.ok){ const pTxt = await profRes.text(); const pJson = pTxt? JSON.parse(pTxt): null; const c2id = pJson?.id || pJson?.user_id || pJson?.userId; if(c2id) user.logbookUserId = c2id; }
+    } catch{}
+    await saveDb();
+    return res.redirect('/settings?tab=token');
+  } catch(e){ console.error('OAuth callback error', e); return res.status(500).send('OAuth error'); }
+});
+
 app.get('/dashboard', requireAuth, async (req, res) => {
   await loadDb();
   const user = db.users.find(u=>u.id===req.session.userId);
@@ -414,6 +453,7 @@ app.get('/sync/logbook', requireAuth, async (req,res)=>{
   const user = db.users.find(u => u.id === req.session.userId);
   if(!user || !user.logbookToken) return res.status(400).json({ ok:false, error:'No token set' });
   const { profile, rawProfile, workouts, attempts, errors } = await fetchLogbookWorkouts(user.logbookToken);
+  if(profile && !user.logbookUserId){ const uid = profile.id || profile.user_id || profile.userId; if(uid){ user.logbookUserId = uid; await saveDb(); } }
   const existingRemote = new Set(db.entries.filter(e => e.origin==='concept2' && e.remoteId).map(e=>e.remoteId));
   let added = 0;
   let xpGained=0;
