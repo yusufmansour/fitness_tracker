@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Challenges - Activity Tracker</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app">
+  <%- include('partials/header', { activePage:'challenges', user: user }) %>
+  <main class="app-main" style="grid-template-columns:1fr;">
+    <section class="card" style="display:flex; flex-direction:column; gap:1rem;">
+      <h1 class="page-title" style="margin-bottom:.25rem;">Challenges</h1>
+      <p class="subtle" style="margin-top:-.5rem;">Complete goals to earn XP. Claim finished challenges to receive rewards.</p>
+    </section>
+    <section class="card challenge-block" aria-labelledby="claimable-head">
+      <div class="section-head"><h2 id="claimable-head">Ready to Claim</h2><span class="subtle"><%= claimable.length %> available</span></div>
+      <% if(claimable.length===0){ %><p class="empty">No completed challenges to claim.</p><% } %>
+      <div class="challenge-grid">
+        <% claimable.forEach(c=>{ %>
+          <div class="challenge card claimable" data-id="<%= c.id %>">
+            <div class="title"><%= c.id.replace(/_/g,' ') %></div>
+            <div class="details">Reward: <strong><%= c.xp %> XP</strong></div>
+            <button class="claim-btn" data-id="<%= c.id %>">Claim</button>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+    <section class="card challenge-block" aria-labelledby="inprogress-head">
+      <div class="section-head"><h2 id="inprogress-head">In Progress</h2><span class="subtle"><%= incomplete.length %> active</span></div>
+      <% if(incomplete.length===0){ %><p class="empty">All challenges complete.</p><% } %>
+      <div class="challenge-grid">
+        <% incomplete.forEach(c=>{ %>
+          <div class="challenge card incomplete" data-id="<%= c.id %>">
+            <div class="title"><%= c.id.replace(/_/g,' ') %></div>
+            <div class="details">Goal: <%= c.group==='day'? (c.meters.toLocaleString()+' m day'): c.group==='streak'? (c.days+' day streak'): (c.meters.toLocaleString()+' m total') %></div>
+            <div class="reward">Reward: <strong><%= c.xp %> XP</strong></div>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+    <section class="card challenge-block" aria-labelledby="claimed-head">
+      <div class="section-head"><h2 id="claimed-head">Claimed</h2><span class="subtle"><%= claimed.length %> earned</span></div>
+      <% if(claimed.length===0){ %><p class="empty">No claimed challenges yet.</p><% } %>
+      <div class="challenge-grid">
+        <% claimed.forEach(c=>{ %>
+          <div class="challenge card claimed" data-id="<%= c.id %>">
+            <div class="title"><%= c.id.replace(/_/g,' ') %></div>
+            <div class="details">Reward: <strong><%= c.xp %> XP</strong></div>
+            <div class="status">Claimed</div>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+  </main>
+  <footer class="app-footer"><small>&copy; <span id="year"></span></small></footer>
+  <script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+  <!-- main.js now globally included via header partial -->
+</body>
+</html>

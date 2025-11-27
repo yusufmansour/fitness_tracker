@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Settings - Activity Tracker</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app">
+  <%- include('partials/header', { activePage:'settings', user:user }) %>
+  <main class="app-main" style="grid-template-columns:1fr;">
+    <section class="card form-card" style="max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:1.1rem;">
+      <h1 class="page-title" style="font-size:1.4rem;">Settings</h1>
+      <% if (saved) { %><div class="alert" style="background:var(--color-primary); color:#fff;">Saved</div><% } %>
+      <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+
+      <div class="tabs" role="tablist">
+        <% const tabVal = (typeof activeTab !== 'undefined' && activeTab) ? activeTab : 'profile'; %>
+        <button class="tab-btn <%= tabVal==='profile' ? 'active':'' %>" data-tab="profile" type="button" role="tab">Profile</button>
+        <button class="tab-btn <%= tabVal==='token' ? 'active':'' %>" data-tab="token" type="button" role="tab">API Token</button>
+        <button class="tab-btn <%= tabVal==='shell' ? 'active':'' %>" data-tab="shell" type="button" role="tab">Shell</button>
+      </div>
+
+      <div class="tab-panels">
+        <div class="tab-panel <%= tabVal==='profile' ? 'active':'' %>" id="tab-profile" <%= tabVal==='profile' ? '' : 'hidden' %>>
+          <form method="post" action="/settings/profile" class="form-grid">
+            <div class="field">
+              <label for="displayName">Display Name</label>
+              <input id="displayName" name="displayName" type="text" maxlength="40" value="<%= user && user.displayName ? user.displayName : '' %>" required>
+            </div>
+            <div class="actions">
+              <button class="btn" type="submit" id="saveProfileBtn">Save Profile</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="tab-panel <%= tabVal==='token' ? 'active':'' %>" id="tab-token" <%= tabVal==='token' ? '' : 'hidden' %>>
+          <form method="post" action="/settings/token" class="form-grid">
+            <div class="field">
+              <label for="logbookToken">Concept2 Logbook Token</label>
+              <input id="logbookToken" name="logbookToken" type="text" placeholder="Paste API token" value="<%= user && user.logbookToken ? user.logbookToken : '' %>">
+              <small class="subtle" style="font-size:.65rem;">Auto-sync runs every 30 min if token present.</small>
+            </div>
+            <div class="field">
+              <label for="logbookUserId">Concept2 User ID</label>
+              <input id="logbookUserId" name="logbookUserId" type="text" placeholder="Enter Concept2 user id (numeric)" value="<%= user && user.logbookUserId ? user.logbookUserId : '' %>">
+              <small class="subtle" style="font-size:.65rem;">Optional: paste your numeric Concept2 user id so webhooks map to you immediately.</small>
+            </div>
+            <div class="actions">
+              <button class="btn" type="submit" id="saveTokenBtn">Save Token</button>
+              <button class="btn" type="button" id="debugBtn" class="btn secondary">Debug</button>
+              <button class="btn" type="button" id="syncNowBtn" style="background:var(--color-warning);">Sync Now</button>
+            </div>
+            <p class="subtle" id="syncStatus" style="font-size:.7rem;"></p>
+          </form>
+        </div>
+
+        <div class="tab-panel <%= tabVal==='shell' ? 'active':'' %>" id="tab-shell" <%= tabVal==='shell' ? '' : 'hidden' %>>
+          <form method="post" action="/settings/shell" class="form-grid" id="shellForm">
+            <div class="field" style="gap:.5rem; order:0;">
+              <label>Shell Preview</label>
+              <div id="shellPreview" style="background:var(--color-surface); padding:.5rem; border:1px solid var(--color-border); border-radius:var(--radius-sm); display:inline-block;">
+                <svg id="shellSvg" width="260" height="90" viewBox="0 0 300 110" preserveAspectRatio="xMidYMid meet">
+                  <g transform="translate(0,110) scale(0.1,-0.1)" stroke="none">
+                    <path class="oar" d="M1161 1018 c7 -13 37 -53 68 -90 31 -37 81 -99 111 -138 30 -39 75 -96 100 -128 25 -31 55 -71 67 -88 l21 -31 -33 -44 c-50 -65 -132 -170 -195 -247 -30 -38 -68 -85 -85 -107 -16 -21 -41 -51 -53 -67 -13 -15 -20 -28 -14 -28 12 0 482 477 482 489 0 5 -84 97 -186 203 -103 106 -207 217 -232 246 -48 54 -71 68 -51 30z"/>
+                    <path class="primary primary1" d="M1235 640 c-38 -4 -113 -10 -165 -14 -52 -4 -162 -13 -245 -21 -253 -25 -503 -45 -563 -46 -62 0 -108 -13 -82 -22 8 -3 69 -8 135 -11 66 -4 136 -8 155 -11 19 -2 145 -13 280 -25 135 -11 262 -22 283 -25 21 -2 98 -8 172 -11 116 -6 135 -5 135 8 0 8 -11 25 -25 38 -14 13 -25 29 -25 36 0 20 39 82 55 88 8 3 15 10 15 16 0 11 -19 11 -125 0z m30 -50 c4 -6 2 -17 -4 -24 -6 -7 -8 -27 -5 -45 l7 -31 -99 5 c-55 4 -130 10 -169 15 -38 5 -106 12 -149 16 -44 4 -91 10 -105 14 -24 6 -23 7 14 13 22 4 94 12 160 18 105 10 153 14 312 26 18 2 35 -2 38 -7z"/>
+                    <path class="primary primary2" d="M1690 642 c0 -5 14 -26 30 -47 17 -21 30 -45 30 -53 0 -8 -17 -35 -37 -60 l-37 -45 80 6 c43 4 138 12 209 17 72 6 150 12 175 15 25 2 77 7 115 10 39 3 90 8 115 11 178 17 389 34 433 34 28 0 58 4 66 9 17 11 -8 14 -309 36 -118 8 -258 20 -310 25 -52 6 -187 17 -300 25 -113 8 -217 18 -232 21 -16 3 -28 1 -28 -4z m300 -62 c373 -29 403 -43 135 -65 -38 -3 -90 -8 -115 -10 -25 -3 -86 -7 -136 -11 l-90 -5 0 50 0 51 35 0 c20 0 97 -5 171 -10z"/>
+                    <path class="secondary secondary1" d="M1265 590 c4 -6 2 -17 -4 -24 -6 -7 -8 -27 -5 -45 l7 -31 -99 5 c-55 4 -130 10 -169 15 -38 5 -106 12 -149 16 -44 4 -91 10 -105 14 -24 6 -23 7 14 13 22 4 94 12 160 18 105 10 153 14 312 26 18 2 35 -2 38 -7 z"/>
+                    <path class="secondary secondary2" d="M1990 580 c373 -29 403 -43 135 -65 -38 -3 -90 -8 -115 -10 -25 -3 -86 -7 -136 -11 l-90 -5 0 50 0 51 35 0 c20 0 97 -5 171 -10z"/>
+                  </g>
+                </svg>
+              </div>
+            </div>
+            <div class="field" style="display:flex; flex-direction:column;">
+              <label for="shellPrimary">Shell Primary</label>
+              <div style="display:flex; align-items:center; gap:.5rem;">
+                <input id="shellPrimary" name="shellPrimary" type="color" value="<%= user && user.shellPrimary ? user.shellPrimary : '#000000' %>">
+                <span class="color-code" id="shellPrimaryCode"><%= user && user.shellPrimary ? user.shellPrimary : '#000000' %></span>
+              </div>
+            </div>
+            <div class="field" style="display:flex; flex-direction:column;">
+              <label for="shellSecondary">Shell Secondary</label>
+              <div style="display:flex; align-items:center; gap:.5rem;">
+                <input id="shellSecondary" name="shellSecondary" type="color" value="<%= user && user.shellSecondary ? user.shellSecondary : '#000000' %>">
+                <span class="color-code" id="shellSecondaryCode"><%= user && user.shellSecondary ? user.shellSecondary : '#000000' %></span>
+              </div>
+            </div>
+            <div class="field" style="display:flex; flex-direction:column;">
+              <label for="oarColor">Oar Color</label>
+              <div style="display:flex; align-items:center; gap:.5rem;">
+                <input id="oarColor" name="oarColor" type="color" value="<%= user && user.oarColor ? user.oarColor : '#000000' %>">
+                <span class="color-code" id="oarColorCode"><%= user && user.oarColor ? user.oarColor : '#000000' %></span>
+              </div>
+            </div>
+            <div class="actions" style="margin-top:.5rem;">
+              <button class="btn" type="submit" id="saveShellBtn">Save Shell Colors</button>
+              <button class="btn" type="button" id="randomizeShellBtn" style="background:var(--color-text-light);">Randomize</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <% if (user && user.logbookLastSync) { %>
+        <div class="subtle" style="font-size:.65rem;">Last sync: <%= user.logbookLastSync.when %> imported <%= Number(user.logbookLastSync.imported||0).toLocaleString('en-US') %> / scanned <%= Number(user.logbookLastSync.scanned||0).toLocaleString('en-US') %></div>
+      <% } %>
+      <% if (user && user.onboarded) { %>
+        <form method="post" action="/onboarding/reset" style="margin-top:.5rem;">
+          <button class="btn" type="submit" style="background:var(--color-warning);">Restart Onboarding</button>
+        </form>
+      <% } %>
+    </section>
+  </main>
+  <footer class="app-footer"><small>&copy; <span id="year"></span></small></footer>
+  <script>
+    // Footer year update only; theme toggle removed (always dark mode)
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Tabs
+    (function(){
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      const panels = document.querySelectorAll('.tab-panel');
+      tabButtons.forEach(b=> b.addEventListener('click', ()=>{
+        tabButtons.forEach(x=>x.classList.remove('active'));
+        panels.forEach(p=>{p.classList.remove('active'); p.hidden=true;});
+        b.classList.add('active');
+        const id = 'tab-' + b.dataset.tab; const panel = document.getElementById(id); panel.hidden=false; panel.classList.add('active');
+      }));
+    })();
+
+    // Logbook (token tab)
+    const debugBtn = document.getElementById('debugBtn');
+    const syncStatus = document.getElementById('syncStatus');
+    debugBtn && debugBtn.addEventListener('click',()=>{ if(!syncStatus) return; syncStatus.textContent='Debug…'; fetch('/api/debug/logbook/profile').then(r=>r.json()).then(d=>{ syncStatus.textContent = d.ok? `Profile keys: ${Object.keys(d.profile||{}).slice(0,6).join(',')}`:'Debug failed'; }).catch(()=> syncStatus.textContent='Debug error'); });
+    const syncBtn=document.getElementById('syncNowBtn');
+    syncBtn && syncBtn.addEventListener('click',()=>{ if(!syncStatus) return; syncStatus.textContent='Syncing…'; fetch('/sync/logbook').then(r=>r.json()).then(d=>{ syncStatus.textContent = d.ok? `Imported ${d.imported} / scanned ${d.candidate}`:'Sync failed'; }).catch(()=> syncStatus.textContent='Sync error'); });
+
+    // Shell preview
+    (function(){
+      function updateShellPreview(){ const svg=document.getElementById('shellSvg'); if(!svg) return; const p=document.getElementById('shellPrimary'); const s=document.getElementById('shellSecondary'); const o=document.getElementById('oarColor'); svg.querySelectorAll('.primary').forEach(el=>el.setAttribute('fill',p?p.value:'#000000')); svg.querySelectorAll('.secondary').forEach(el=>el.setAttribute('fill',s?s.value:'#000000')); svg.querySelectorAll('.oar').forEach(el=>el.setAttribute('fill',o?o.value:'#000000')); }
+      ['shellPrimary','shellSecondary','oarColor'].forEach(id=>{ const el=document.getElementById(id); el && el.addEventListener('input',updateShellPreview); el && el.addEventListener('change',e=>{ const val=e.target.value; navigator.clipboard && navigator.clipboard.writeText(val).catch(()=>{}); flash('Copied '+val); }); });
+      updateShellPreview();
+      const status=document.createElement('div');
+      status.style.cssText='position:fixed;bottom:14px;right:14px;background:var(--color-primary);color:#fff;padding:.4rem .7rem;font-size:.65rem;border-radius:6px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s;z-index:60;';
+      document.body.appendChild(status);
+      function flash(msg){ status.textContent=msg; status.style.opacity='1'; setTimeout(()=>status.style.opacity='0',1200); }
+    })();
+  </script>
+  <script>
+    (function(){
+      const prim=document.getElementById('shellPrimary');
+      const sec=document.getElementById('shellSecondary');
+      const oar=document.getElementById('oarColor');
+      const primCode=document.getElementById('shellPrimaryCode');
+      const secCode=document.getElementById('shellSecondaryCode');
+      const oarCode=document.getElementById('oarColorCode');
+      // Use existing preview (id settingsShellPreview or first svg)
+      const svg=document.getElementById('shellSvg') || document.querySelector('#shellPreview svg') || document.querySelector('svg');
+      function apply(){
+        if(svg){
+          svg.querySelectorAll('.primary').forEach(el=>el.setAttribute('fill',prim.value||'#000000'));
+          svg.querySelectorAll('.secondary').forEach(el=>el.setAttribute('fill',sec.value||'#000000'));
+          svg.querySelectorAll('.oar').forEach(el=>el.setAttribute('fill',oar.value||'#000000'));
+        }
+        if(primCode) primCode.textContent=prim.value;
+        if(secCode) secCode.textContent=sec.value;
+        if(oarCode) oarCode.textContent=oar.value;
+      }
+      [prim,sec,oar].forEach(inp=>{ if(!inp) return; inp.addEventListener('input',apply); inp.addEventListener('change',()=>{navigator.clipboard&&navigator.clipboard.writeText(inp.value).catch(()=>{});}); });
+      apply();
+    })();
+  </script>
+  <script>
+    (function(){
+      const prim=document.getElementById('shellPrimary');
+      const sec=document.getElementById('shellSecondary');
+      const oar=document.getElementById('oarColor');
+      const toast=document.querySelector('.copy-status')||(()=>{const t=document.createElement('div');t.className='copy-status';document.body.appendChild(t);return t;})();
+      function show(msg){toast.textContent=msg;toast.style.opacity='1';clearTimeout(toast._h);toast._h=setTimeout(()=>toast.style.opacity='0',1400);}
+      function save(){fetch('/settings/shell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({shellPrimary:prim.value,shellSecondary:sec.value,oarColor:oar.value})}).then(r=>r.ok?show('Shell colors saved'):show('Save failed')).catch(()=>show('Save failed'));}
+      const saveShellBtn=document.getElementById('saveShellBtn');
+      saveShellBtn && saveShellBtn.addEventListener('click',e=>{ e.preventDefault(); save(); });
+      const randomBtn=document.getElementById('randomizeShellBtn');
+      randomBtn && randomBtn.addEventListener('click',()=>{ function rand(){return '#'+Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6,'0');} prim.value=rand(); sec.value=rand(); oar.value=rand(); prim.dispatchEvent(new Event('input')); sec.dispatchEvent(new Event('input')); oar.dispatchEvent(new Event('input')); });
+    })();
+  </script>
+</body>
+</html>
