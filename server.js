@@ -782,6 +782,14 @@ app.post('/webhook/concept2', async (req,res)=>{
       const metersRaw = r.distance || r.total_distance || r.meters || r.workDistance || 0;
       const meters = typeof metersRaw === 'string' ? Number(String(metersRaw).replace(/[^0-9]/g,'')) : Number(metersRaw);
       const date = String(r.date || r.workoutDate || r.datetime || r.timestamp || '').substring(0,10) || new Date().toISOString().substring(0,10);
+      // Debug: print incoming Concept2 webhook info
+      console.log('Concept2 Webhook Received:', {
+        userIdRemote,
+        remoteId,
+        meters,
+        date,
+        rawPayload: req.body
+      });
       const user = db.users.find(u=> (u.logbookUserId && String(u.logbookUserId)===String(userIdRemote)) || (u.id===userIdRemote));
       if(!user){ pushWebhookDebug({ note:'user-not-mapped', userIdRemote, remoteId }); return res.status(200).json({ ok:true, ignored:true, reason:'user-not-mapped' }); }
       // Update or insert entry
