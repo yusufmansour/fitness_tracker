@@ -235,7 +235,18 @@ app.get('/auth/concept2/callback', requireAuth, async (req,res)=>{
     const tText = await tRes.text();
     let tJson = null; try{ tJson = tText? JSON.parse(tText): null; } catch{}
     if(!tRes.ok || !tJson?.access_token){
-      console.error('Token exchange failed', tRes.status, tText);
+      // Enhanced error logging for debugging
+      console.error('Token exchange failed', {
+        status: tRes.status,
+        statusText: tRes.statusText,
+        response: tText,
+        request: {
+          url: tokenUrl,
+          body: Object.fromEntries(body),
+          headers: { 'Content-Type':'application/x-www-form-urlencoded', 'Accept':'application/json' },
+          redirect_uri: redirectUri,
+        }
+      });
       return res.status(502).send('Token exchange failed');
     }
     await loadDb();
@@ -246,10 +257,13 @@ app.get('/auth/concept2/callback', requireAuth, async (req,res)=>{
     try {
       const profRes = await fetch((process.env.LOGBOOK_API_BASE || 'https://log.concept2.com') + '/api/users/me.json', { headers:{ 'Authorization':'Bearer '+user.logbookToken, 'Accept':'application/json' } });
       if(profRes.ok){ const pTxt = await profRes.text(); const pJson = pTxt? JSON.parse(pTxt): null; const c2id = pJson?.id || pJson?.user_id || pJson?.userId; if(c2id) user.logbookUserId = c2id; }
-    } catch{}
+    } catch(e) { console.error('Profile fetch error after token exchange', e); }
     await saveDb();
     return res.redirect('/settings?tab=token');
-  } catch(e){ console.error('OAuth callback error', e); return res.status(500).send('OAuth error'); }
+  } catch(e){
+    console.error('OAuth callback error', e);
+    return res.status(500).send('OAuth error');
+  }
 });
 
 app.get('/dashboard', requireAuth, async (req, res) => {
