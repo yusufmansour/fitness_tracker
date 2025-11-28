@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Onboarding - Activity Tracker</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app">
+  <%- include('partials/header', { activePage:'onboarding', user:{ id: user.id, email:user.email }, onboardingMode:true }) %>
+<main class="app-main" style="grid-template-columns:1fr;">
+  <section class="card form-card" style="max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:1.2rem;">
+    <div class="step-indicator">Step <%= stepIndex %> of <%= stepTotal %></div>
+    <div class="onboard-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= Math.round(((stepIndex-1)/stepTotal)*100) %>">
+      <div class="onboard-progress-fill" style="width:<%= ((stepIndex-1)/stepTotal*100).toFixed(1) %>%"></div>
+    </div>
+    <% const finalStep = (stepIndex === stepTotal); %>
+    <% if (step==='display') { %>
+      <h1 style="font-size:1.3rem;">Set Your Display Name</h1>
+      <p class="subtle" style="font-size:.7rem;">This name appears on the leaderboard.</p>
+    <% } else if (step==='goal') { %>
+      <h1 style="font-size:1.3rem;">Set Your Goal</h1>
+      <p class="subtle" style="font-size:.7rem;">How many meters are you planning to get by the end of this challenge?</p>
+    <% } else if (step==='colors') { %>
+      <% if(finalStep){ %><div class="subtle" style="font-size:.65rem;">Final Step</div><% } %>
+      <h1 style="font-size:1.3rem;">Customize Shell</h1>
+      <p class="subtle" style="font-size:.7rem;">Pick colors for your shell and riggers.</p>
+    <% } else if (step==='token') { %>
+      <% if(finalStep){ %><div class="subtle" style="font-size:.65rem;">Final Step</div><% } %>
+    <% } %>
+    <% if (step==='display') { %>
+      <form method="post" action="/onboarding/display" class="form-grid">
+        <div class="field">
+          <label for="displayName">Display Name</label>
+          <input id="displayName" name="displayName" type="text" maxlength="40" value="<%= (user.displayName || (user.email? user.email.split('@')[0] : '')) %>" required>
+        </div>
+        <div class="actions"><button class="btn" type="submit"><%= finalStep ? 'Finish' : 'Continue' %></button></div>
+      </form>
+    <% } else if (step==='goal') { %>
+      <form method="post" action="/onboarding/goal" class="form-grid">
+        <div class="field">
+          <label for="goalMeters">Goal (meters)</label>
+          <input id="goalMeters" name="goalMeters" type="number" min="1" step="1" required placeholder="e.g. 50000">
+        </div>
+        <div class="actions"><button class="btn" type="submit"><%= finalStep ? 'Finish' : 'Continue' %></button></div>
+      </form>
+    <% } else if (step==='colors') { %>
+      <form method="post" action="/onboarding/colors" class="form-grid">
+        <div class="field" style="gap:.4rem;">
+          <label>Shell Preview</label>
+          <div id="shellPreview" style="background:var(--color-surface); padding:.5rem; border:1px solid var(--color-border); border-radius:var(--radius-sm); display:inline-block;">
+            <svg id="shellSvg" width="240" height="80" viewBox="0 0 300 110" preserveAspectRatio="xMidYMid meet">
+              <g transform="translate(0,110) scale(0.1,-0.1)" stroke="none">
+                <path class="oar" fill="<%= initOar || '#FF4F4F' %>" d="M1161 1018 c7 -13 37 -53 68 -90 31 -37 81 -99 111 -138 30 -39 75 -96 100 -128 25 -31 55 -71 67 -88 l21 -31 -33 -44 c-50 -65 -132 -170 -195 -247 -30 -38 -68 -85 -85 -107 -16 -21 -41 -51 -53 -67 -13 -15 -20 -28 -14 -28 12 0 482 477 482 489 0 5 -84 97 -186 203 -103 106 -207 217 -232 246 -48 54 -71 68 -51 30z"/>
+                <path class="primary primary1" fill="<%= initPrimary || '#2E7BCB' %>" d="M1235 640 c-38 -4 -113 -10 -165 -14 -52 -4 -162 -13 -245 -21 -253 -25 -503 -45 -563 -46 -62 0 -108 -13 -82 -22 8 -3 69 -8 135 -11 66 -4 136 -8 155 -11 19 -2 145 -13 280 -25 135 -11 262 -22 283 -25 21 -2 98 -8 172 -11 116 -6 135 -5 135 8 0 8 -11 25 -25 38 -14 13 -25 29 -25 36 0 20 39 82 55 88 8 3 15 10 15 16 0 11 -19 11 -125 0z m30 -50 c4 -6 2 -17 -4 -24 -6 -7 -8 -27 -5 -45 l7 -31 -99 5 c-55 4 -130 10 -169 15 -38 5 -106 12 -149 16 -44 4 -91 10 -105 14 -24 6 -23 7 14 13 22 4 94 12 160 18 105 10 153 14 312 26 18 2 35 -2 38 -7z"/>
+                <path class="primary primary2" fill="<%= initPrimary || '#2E7BCB' %>" d="M1690 642 c0 -5 14 -26 30 -47 17 -21 30 -45 30 -53 0 -8 -17 -35 -37 -60 l-37 -45 80 6 c43 4 138 12 209 17 72 6 150 12 175 15 25 2 77 7 115 10 39 3 90 8 115 11 178 17 389 34 433 34 28 0 58 4 66 9 17 11 -8 14 -309 36 -118 8 -258 20 -310 25 -52 6 -187 17 -300 25 -113 8 -217 18 -232 21 -16 3 -28 1 -28 -4z m300 -62 c373 -29 403 -43 135 -65 -38 -3 -90 -8 -115 -10 -25 -3 -86 -7 -136 -11 l-90 -5 0 50 0 51 35 0 c20 0 97 -5 171 -10z"/>
+                <path class="secondary secondary1" fill="<%= initSecondary || '#FFD447' %>" d="M1265 590 c4 -6 2 -17 -4 -24 -6 -7 -8 -27 -5 -45 l7 -31 -99 5 c-55 4 -130 10 -169 15 -38 5 -106 12 -149 16 -44 4 -91 10 -105 14 -24 6 -23 7 14 13 22 4 94 12 160 18 105 10 153 14 312 26 18 2 35 -2 38 -7 z"/>
+                <path class="secondary secondary2" fill="<%= initSecondary || '#FFD447' %>" d="M1990 580 c373 -29 403 -43 135 -65 -38 -3 -90 -8 -115 -10 -25 -3 -86 -7 -136 -11 l-90 -5 0 50 0 51 35 0 c20 0 97 -5 171 -10z"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+        <div class="field"><label for="shellPrimary">Shell</label><input id="shellPrimary" name="shellPrimary" type="color" value="<%= initPrimary || '#2E7BCB' %>"></div>
+        <div class="field"><label for="shellSecondary">Decks</label><input id="shellSecondary" name="shellSecondary" type="color" value="<%= initSecondary || '#FFD447' %>"></div>
+        <div class="field"><label for="oarColor">Riggers</label><input id="oarColor" name="oarColor" type="color" value="<%= initOar || '#FF4F4F' %>"></div>
+        <div class="actions"><button class="btn" type="submit"><%= finalStep ? 'Finish' : 'Continue' %></button></div>
+      </form>
+    <% } else if (step==='id') { %>
+      <h1 style="font-size:1.3rem;">Concept2 User ID</h1>
+      <p class="subtle" style="font-size:.7rem;">Paste your numeric Concept2 Logbook ID so incoming webhooks map to your account. This is required to continue.</p>
+      <form method="post" action="/onboarding/id" class="form-grid">
+        <div class="field">
+          <label for="logbookUserId">Concept2 User ID</label>
+          <input id="logbookUserId" name="logbookUserId" type="text" maxlength="40" placeholder="Paste your numeric Concept2 user id (optional)" value="<%= user.logbookUserId || '' %>">
+          <div class="subtle" style="font-size:.7rem; margin-top:.2rem;">Pasting your numeric Concept2 user id will allow incoming webhooks to be mapped to your account immediately.</div>
+        </div>
+        <div class="field" style="display:flex; flex-direction:column; gap:.4rem;">
+          <div style="max-width:360px;">
+            <img src="/concept2_logbook_id.png" alt="Where to find your Concept2 Logbook ID" style="width:100%; height:auto; border:1px solid var(--color-border); border-radius:6px;">
+            <div class="subtle" style="font-size:.7rem; margin-top:.3rem;">Example: open your Concept2 Logbook profile and look for the numeric user id shown in your account details.</div>
+          </div>
+        </div>
+        <div class="actions" style="display:flex; gap:.75rem;">
+          <button class="btn" type="submit">Continue</button>
+        </div>
+      </form>
+    <% } else if (step==='connect') { %>
+      <h1 style="font-size:1.3rem;">Connect with Concept2</h1>
+      <p class="subtle" style="font-size:.7rem;">Authorize with Concept2 to allow automatic import of your workouts. This connection is required to finish onboarding.</p>
+      <div class="form-grid">
+        <div class="field" style="display:flex; align-items:center; gap:.6rem;">
+          <% const connected = !!(user && user.logbookToken); %>
+          <% if(connected){ %>
+            <label style="display:flex; align-items:center; gap:.5rem; font-size:0.95rem;">
+              <input type="checkbox" disabled checked style="width:18px; height:18px;">
+              <span style="color:#188038; font-weight:600;">Connected</span>
+            </label>
+            <a class="btn" style="text-decoration:none; opacity:0.8; pointer-events:none; background:#2ecc71; border-color:#27ae60; color:#fff;">Connected</a>
+          <% } else { %>
+            <a href="/auth/concept2" class="btn" style="text-decoration:none;">Connect with Concept2</a>
+          <% } %>
+          <div class="subtle" style="font-size:.7rem;">This step is required — click Connect to authorize with Concept2.</div>
+        </div>
+        <% if (tokenError) { %><div class="alert error" style="margin-top:-.3rem;"><%= tokenError %></div><% } %>
+        <div class="actions" style="display:flex; gap:.75rem; margin-top:.5rem;">
+          <form method="post" action="/onboarding/token" style="display:inline-block; margin:0;">
+            <button class="btn" type="submit">Finish</button>
+          </form>
+          
+        </div>
+      </div>
+    <% } %>
+  </section>
+</main>
+<script>
+  // Force dark theme visually
+  try { document.documentElement.dataset.theme='dark'; } catch{}
+  function updatePreview(){ const svg=document.getElementById('shellSvg'); if(!svg) return; const p=document.getElementById('shellPrimary'); const s=document.getElementById('shellSecondary'); const o=document.getElementById('oarColor'); svg.querySelectorAll('.primary').forEach(el=>el.setAttribute('fill',p?p.value:'#2E7BCB')); svg.querySelectorAll('.secondary').forEach(el=>el.setAttribute('fill',s?s.value:'#FFD447')); svg.querySelectorAll('.oar').forEach(el=>el.setAttribute('fill',o?o.value:'#FF4F4F')); }
+  ['shellPrimary','shellSecondary','oarColor'].forEach(id=>{ const el=document.getElementById(id); el && el.addEventListener('input',updatePreview); });
+  updatePreview();
+  // Share color on change (copy to clipboard + transient status)
+  (function(){
+    const status = document.createElement('div');
+    status.style.cssText='position:fixed;bottom:14px;right:14px;background:var(--color-primary);color:#fff;padding:.4rem .7rem;font-size:.65rem;border-radius:6px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s;z-index:50;';
+    status.textContent='';
+    document.body.appendChild(status);
+    function flash(msg){ status.textContent=msg; status.style.opacity='1'; setTimeout(()=>status.style.opacity='0',1200); }
+    ['shellPrimary','shellSecondary','oarColor'].forEach(id=>{ const el=document.getElementById(id); if(!el) return; el.addEventListener('change',e=>{ const val=e.target.value; navigator.clipboard && navigator.clipboard.writeText(val).catch(()=>{}); flash('Copied '+val); }); });
+  })();
+  // No polling: allow finishing onboarding immediately regardless of Concept2 connection
+</script>
+</body>
+</html>

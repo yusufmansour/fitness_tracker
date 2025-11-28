@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Activity Tracker</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app">
+  <%- include('partials/header', { activePage:'home', user:user }) %>
+
+  <main class="app-main" style="grid-template-columns:1fr;">
+    <section class="card hero">
+      
+      <div class="actions" style="margin-top:.5rem; display:flex; gap:.75rem; flex-wrap:wrap;">
+        <% if (user) { %>
+          <a href="/dashboard" class="btn">Go to My Progress</a>
+        <% } else { %>
+          <a href="/register" class="btn">Get Started</a>
+          <a href="/login" class="btn" style="background:var(--color-text-light);">Login</a>
+        <% } %>
+      </div>
+    </section>
+    <% if (user) { %>
+    <section class="card" id="recentUpdates" style="display:flex; flex-direction:column; gap:.75rem;">
+      <h2 style="margin:0;font-size:1.15rem;">Recent Updates</h2>
+      <p class="subtle" style="margin-top:-.3rem;font-size:.7rem;">Top 3 rank changes and goal milestones.</p>
+      <ul id="updatesList" style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.5rem; min-height:40px;">
+        <li class="subtle" id="updatesLoading">Loading…</li>
+      </ul>
+      <button id="showMoreUpdates" class="btn small" style="align-self:flex-start; display:none;">Show More</button>
+    </section>
+    <% } %>
+    
+  </main>
+
+  <footer class="app-footer"><small>&copy; <span id="year"></span> Activity Tracker</small></footer>
+
+  <!-- main.js now globally included via header partial -->
+</body>
+</html>
