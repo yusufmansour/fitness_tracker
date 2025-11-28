@@ -13,6 +13,9 @@
       <h1 class="page-title" style="font-size:1.6rem;">Login</h1>
       <% if (typeof error !== 'undefined') { %>
         <div class="alert error" role="alert"><%= error %></div>
+        <div class="alert" role="alert" style="margin-top:.5rem; background:#fff3cd; color:#856404; border-color:#ffeeba;">
+          <strong>Notice:</strong> If you created an account prior to 11/28/2025 2:30pm, you will need to create a new account due to unexpetcted data loss.
+        </div>
       <% } %>
       <form method="post" class="form-grid" autocomplete="off">
         <div class="field">
