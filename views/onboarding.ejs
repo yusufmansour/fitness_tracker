@@ -24,7 +24,7 @@
     <% } else if (step==='colors') { %>
       <% if(finalStep){ %><div class="subtle" style="font-size:.65rem;">Final Step</div><% } %>
       <h1 style="font-size:1.3rem;">Customize Shell</h1>
-      <p class="subtle" style="font-size:.7rem;">Pick colors for your shell and oar.</p>
+      <p class="subtle" style="font-size:.7rem;">Pick colors for your shell and riggers.</p>
     <% } else if (step==='token') { %>
       <% if(finalStep){ %><div class="subtle" style="font-size:.65rem;">Final Step</div><% } %>
     <% } %>
@@ -60,9 +60,9 @@
             </svg>
           </div>
         </div>
-        <div class="field"><label for="shellPrimary">Primary</label><input id="shellPrimary" name="shellPrimary" type="color" value="<%= initPrimary || '#2E7BCB' %>"></div>
-        <div class="field"><label for="shellSecondary">Secondary</label><input id="shellSecondary" name="shellSecondary" type="color" value="<%= initSecondary || '#FFD447' %>"></div>
-        <div class="field"><label for="oarColor">Oar</label><input id="oarColor" name="oarColor" type="color" value="<%= initOar || '#FF4F4F' %>"></div>
+        <div class="field"><label for="shellPrimary">Shell</label><input id="shellPrimary" name="shellPrimary" type="color" value="<%= initPrimary || '#2E7BCB' %>"></div>
+        <div class="field"><label for="shellSecondary">Decks</label><input id="shellSecondary" name="shellSecondary" type="color" value="<%= initSecondary || '#FFD447' %>"></div>
+        <div class="field"><label for="oarColor">Riggers</label><input id="oarColor" name="oarColor" type="color" value="<%= initOar || '#FF4F4F' %>"></div>
         <div class="actions"><button class="btn" type="submit"><%= finalStep ? 'Finish' : 'Continue' %></button></div>
       </form>
     <% } else if (step==='id') { %>

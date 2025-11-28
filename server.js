@@ -5,8 +5,14 @@ const app = express();
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const fs = require('fs').promises;
-const dbFile = path.join(__dirname, 'db.json');
+// DB path can be overridden to point to a persistent volume (e.g. Render persistent disk)
+const DB_PATH = process.env.DB_PATH || __dirname;
+const dbFile = path.join(DB_PATH, 'db.json');
 let db = { users: [], entries: [], events: [] };
+// Backup configuration (can be overridden via environment variables)
+const BACKUP_DIR = path.join(process.env.DB_PATH || __dirname, 'backups');
+const BACKUP_INTERVAL_MS = Number(process.env.DB_BACKUP_INTERVAL_MS) || 60 * 60 * 1000; // default: 1 hour
+const BACKUP_RETENTION = Number(process.env.DB_BACKUP_RETENTION) || 168; // default: keep 168 backups (~7 days hourly)
 // In-memory sync state per user (non-persistent)
 const syncState = new Map(); // userId -> { etag, lastModified, lastIds:Set<string>, backoffMin:number, lastAttempt:number, lastSuccess:number, userId:number }
 
@@ -18,13 +24,37 @@ async function loadDb() {
     db.entries = db.entries || [];
     db.events = db.events || []; // initialize events array
   } catch (e) {
-    db = { users: [], entries: [], events: [] };
-    await saveDb();
+    console.error('loadDb error reading/parsing db file:', e);
+    // Attempt to recover from backup file if available
+    try {
+      const bakTxt = await fs.readFile(dbFile + '.bak', 'utf8');
+      db = JSON.parse(bakTxt || '{}');
+      db.users = db.users || [];
+      db.entries = db.entries || [];
+      db.events = db.events || [];
+      console.warn('loadDb: restored database from backup', dbFile + '.bak');
+    } catch (e2) {
+      // No valid backup found — initialize in-memory empty DB but do NOT immediately overwrite the file
+      console.warn('loadDb: no backup available, initializing empty in-memory DB but not overwriting file');
+      db = { users: [], entries: [], events: [] };
+    }
   }
 }
 
 async function saveDb() {
-  await fs.writeFile(dbFile, JSON.stringify(db, null, 2));
+  // Write atomically: write to a temp file then rename. Keep a .bak copy of the previous DB to allow recovery.
+  const tmpFile = dbFile + '.tmp';
+  const bakFile = dbFile + '.bak';
+  try {
+    // Try to preserve existing DB as a backup first (best-effort)
+    try { await fs.copyFile(dbFile, bakFile); } catch (copyErr) { /* ignore if file doesn't exist */ }
+    await fs.writeFile(tmpFile, JSON.stringify(db, null, 2));
+    await fs.rename(tmpFile, dbFile);
+  } catch (e) {
+    console.error('saveDb error writing db file:', e);
+    // Attempt fallback: write directly (may truncate)
+    try { await fs.writeFile(dbFile, JSON.stringify(db, null, 2)); } catch (e2) { console.error('saveDb fallback failed:', e2); throw e2; }
+  }
 }
 
 async function initDb() {
@@ -32,6 +62,46 @@ async function initDb() {
 }
 
 initDb();
+
+// Ensure backup directory exists
+async function ensureBackupDir() {
+  try { await fs.mkdir(BACKUP_DIR, { recursive: true }); } catch (e) { /* ignore */ }
+}
+
+async function makeBackup() {
+  try {
+    await ensureBackupDir();
+    const now = new Date();
+    const stamp = now.toISOString().replace(/[:.]/g, '-');
+    const out = path.join(BACKUP_DIR, `db-${stamp}.json`);
+    // Only backup if dbFile exists
+    try {
+      await fs.copyFile(dbFile, out);
+      console.log('DB backup created:', out);
+    } catch (e) {
+      // If dbFile doesn't exist yet, create backup from current in-memory db
+      try {
+        await fs.writeFile(out, JSON.stringify(db, null, 2));
+        console.log('DB backup (from memory) created:', out);
+      } catch (e2) { console.error('makeBackup failed to write backup:', e2); }
+    }
+    // Prune old backups, keep newest BACKUP_RETENTION files
+    try {
+      const files = await fs.readdir(BACKUP_DIR);
+      const backups = files.filter(f => f.startsWith('db-') && f.endsWith('.json'))
+        .map(f => ({ f, p: path.join(BACKUP_DIR, f) }));
+      backups.sort((a, b) => a.f < b.f ? 1 : -1); // newest first by filename (ISO timestamp)
+      const toRemove = backups.slice(BACKUP_RETENTION);
+      await Promise.all(toRemove.map(x => fs.unlink(x.p).catch(()=>{})));
+    } catch (e) { /* ignore pruning errors */ }
+  } catch (e) { console.error('makeBackup error', e); }
+}
+
+// Schedule regular backups
+setTimeout(() => { // start after initial initDb attempt
+  makeBackup().catch(()=>{});
+  setInterval(() => { makeBackup().catch(()=>{}); }, BACKUP_INTERVAL_MS);
+}, 2000);
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));

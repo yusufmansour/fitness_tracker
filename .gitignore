@@ -1,0 +1,4 @@
+# Ignore runtime DB and backups
+/db.json
+/db.json.bak
+/backups/
